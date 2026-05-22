@@ -1,8 +1,10 @@
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using ProjectLucy.BLL.Base;
 using ProjectLucy.BLL.IServices;
 using ProjectLucy.BLL.Settings;
 using ProjectLucy.DAL.Base;
+using ProjectLucy.DAL.Context;
 using ProjectLucy.DAL.Entities;
 using ProjectLucy.DAL.UnitOfWork;
 using ProjectLucy.Shared.Dtos.LoginDtos;
@@ -18,6 +20,7 @@ namespace ProjectLucy.BLL.Services
         private readonly IGenericRepositories<Role> _roleRepo;
         private readonly IGenericRepositories<RefreshToken> _refreshTokenRepo;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly NeondbContext _context;
         private readonly IJwtTokenService _jwtTokenService;
         private readonly JwtSettings _jwtSettings;
 
@@ -28,6 +31,7 @@ namespace ProjectLucy.BLL.Services
             IGenericRepositories<Role> roleRepo,
             IGenericRepositories<RefreshToken> refreshTokenRepo,
             IUnitOfWork unitOfWork,
+            NeondbContext context,
             IJwtTokenService jwtTokenService,
             IOptions<JwtSettings> jwtSettings)
         {
@@ -35,6 +39,7 @@ namespace ProjectLucy.BLL.Services
             _roleRepo = roleRepo;
             _refreshTokenRepo = refreshTokenRepo;
             _unitOfWork = unitOfWork;
+            _context = context;
             _jwtTokenService = jwtTokenService;
             _jwtSettings = jwtSettings.Value;
         }
@@ -45,12 +50,7 @@ namespace ProjectLucy.BLL.Services
         public async Task<IServiceResult> LoginAsync(LoginRequest request)
         {
             // 1. Find user by email
-            var users = await _userRepo.GetAllAsync(
-                predicate: u => u.UserEmail == request.Email.ToLower().Trim(),
-                asNoTracking: true
-            );
-
-            var foundUser = users.FirstOrDefault();
+            var foundUser = await _context.Users.FirstOrDefaultAsync(u => u.UserEmail == request.Email.ToLower().Trim());
 
             if (foundUser == null)
                 return new ServiceResult(401, "Invalid email or password");
@@ -67,11 +67,11 @@ namespace ProjectLucy.BLL.Services
             foundUser.Role = roles.FirstOrDefault()!;
 
             // 4. Generate tokens
-            var accessToken = _jwtTokenService.GenerateAccessToken(foundUser);
-            var refreshTokenValue = _jwtTokenService.GenerateRefreshToken();
+            string accessToken = _jwtTokenService.GenerateAccessToken(foundUser);
+            string refreshTokenValue = _jwtTokenService.GenerateRefreshToken();
 
             // 5. Persist refresh token
-            var refreshTokenEntity = new RefreshToken
+            RefreshToken refreshTokenEntity = new RefreshToken
             {
                 TokenId = Guid.NewGuid(),
                 Token = refreshTokenValue,
@@ -108,7 +108,7 @@ namespace ProjectLucy.BLL.Services
         public async Task<IServiceResult> RegisterAsync(RegisterRequest request)
         {
             // 1. Check duplicate email
-            var emailExists = await _userRepo.AnyAsync(
+            bool emailExists = await _userRepo.AnyAsync(
                 u => u.UserEmail == request.Email.ToLower().Trim()
             );
 
@@ -118,7 +118,7 @@ namespace ProjectLucy.BLL.Services
             // 2. Check duplicate phone (if provided)
             if (!string.IsNullOrWhiteSpace(request.PhoneNumber))
             {
-                var phoneExists = await _userRepo.AnyAsync(
+                bool phoneExists = await _userRepo.AnyAsync(
                     u => u.UserPhoneNumber == request.PhoneNumber.Trim()
                 );
 
@@ -158,7 +158,7 @@ namespace ProjectLucy.BLL.Services
             await _userRepo.CreateAsync(newUser);
             await _unitOfWork.SaveChangesAsync();
 
-            var response = new RegisterResponse
+            RegisterResponse response = new RegisterResponse
             {
                 UserId = newUser.UserId,
                 FullName = newUser.UserFullName,
@@ -212,10 +212,10 @@ namespace ProjectLucy.BLL.Services
             await _refreshTokenRepo.UpdateAsync(storedToken);
 
             // 4. Issue new tokens
-            var newAccessToken = _jwtTokenService.GenerateAccessToken(user);
-            var newRefreshTokenValue = _jwtTokenService.GenerateRefreshToken();
+            string newAccessToken = _jwtTokenService.GenerateAccessToken(user);
+            string newRefreshTokenValue = _jwtTokenService.GenerateRefreshToken();
 
-            var newRefreshToken = new RefreshToken
+            RefreshToken newRefreshToken = new RefreshToken
             {
                 TokenId = Guid.NewGuid(),
                 Token = newRefreshTokenValue,
@@ -251,12 +251,7 @@ namespace ProjectLucy.BLL.Services
         // ─────────────────────────────────────────────────────────────
         public async Task<IServiceResult> LogoutAsync(string refreshToken)
         {
-            var tokenEntities = await _refreshTokenRepo.GetAllAsync(
-                predicate: rt => rt.Token == refreshToken,
-                asNoTracking: false
-            );
-
-            var storedToken = tokenEntities.FirstOrDefault();
+            var storedToken = await _context.RefreshTokens.FirstOrDefaultAsync(rt => rt.Token == refreshToken);
 
             if (storedToken == null)
                 return new ServiceResult(404, "Refresh token not found");

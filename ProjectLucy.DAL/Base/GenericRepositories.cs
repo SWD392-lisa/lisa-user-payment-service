@@ -316,5 +316,34 @@ namespace ProjectLucy.DAL.Base
             await _context.AddAsync(entity);
             return entity;
         }
+
+        public async Task<T?> FirstOrDefaultAsync(
+            Expression<Func<T, bool>>? predicate = null,
+            Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null,
+            bool asNoTracking = true,
+            params Expression<Func<T, object>>[] includes
+        )
+        {
+            IQueryable<T> query = _dbSet;
+
+            // Apply AsNoTracking nếu không cần tracking
+            if (asNoTracking)
+                query = query.AsNoTracking();
+
+            // Include các navigation properties
+            if (includes != null)
+                foreach (var include in includes)
+                    query = query.Include(include);
+
+            // Apply điều kiện lọc
+            if (predicate != null)
+                query = query.Where(predicate);
+
+            // Apply sắp xếp
+            if (orderBy != null)
+                query = orderBy(query);
+
+            return await query.FirstOrDefaultAsync();
+        }
     }
 }
