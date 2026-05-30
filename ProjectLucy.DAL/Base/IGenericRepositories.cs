@@ -78,11 +78,11 @@ namespace ProjectLucy.DAL.Base
         );
 
         Task<T?> FirstOrDefaultAsync(
-    Expression<Func<T, bool>>? predicate = null,
-    Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null,
-    bool asNoTracking = true,
-    params Expression<Func<T, object>>[] includes
-);
+            Expression<Func<T, bool>>? predicate = null,
+            Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null,
+            bool asNoTracking = true,
+            params Expression<Func<T, object>>[] includes
+        );
         Task<int> CountAsync(
         Expression<Func<T, bool>>? predicate = null,
         bool asNoTracking = true);

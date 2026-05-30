@@ -1,10 +1,15 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using ProjectLucy.BLL.IServices;
+using MediatR;
+using ProjectLucy.Application.Auth.Commands.Login;
+using ProjectLucy.Application.Auth.Commands.Logout;
+using ProjectLucy.Application.Auth.Commands.RefreshToken;
+using ProjectLucy.Application.Auth.Commands.Register;
 using ProjectLucy.Shared.Dtos.LoginDtos;
 using ProjectLucy.Shared.Dtos.LogoutDtos;
 using ProjectLucy.Shared.Dtos.RefreshTokenDtos;
 using ProjectLucy.Shared.Dtos.RegisterDtos;
+using AppLoginResponse = ProjectLucy.Application.Auth.DTOs.LoginResponse;
 
 namespace ProjectLucy.API.Controllers
 {
@@ -12,13 +17,13 @@ namespace ProjectLucy.API.Controllers
     [Route("api/[controller]")]
     public class AuthController : ControllerBase
     {
-        private readonly IAuthService _authService;
+        private readonly ISender _sender;
 
         private const string RefreshTokenCookieName = "refreshToken";
 
-        public AuthController(IAuthService authService)
+        public AuthController(ISender sender)
         {
-            _authService = authService;
+            _sender = sender;
         }
 
         // ─────────────────────────────────────────────────────────────
@@ -35,12 +40,12 @@ namespace ProjectLucy.API.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var result = await _authService.LoginAsync(request);
+            var result = await _sender.Send(new LoginCommand(request.Email, request.Password));
 
             if (result.Status != 200)
                 return StatusCode(result.Status, result);
 
-            if (result.Data is LoginResponse loginResponse)
+            if (result.Data is AppLoginResponse loginResponse)
                 SetRefreshTokenCookie(loginResponse.RefreshToken);
 
             return Ok(result);
@@ -59,7 +64,13 @@ namespace ProjectLucy.API.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var result = await _authService.RegisterAsync(request);
+            var result = await _sender.Send(new RegisterCommand(
+                request.FullName,
+                request.Email,
+                request.Password,
+                request.ConfirmPassword,
+                request.Birthday,
+                request.PhoneNumber));
 
             return StatusCode(result.Status, result);
         }
@@ -82,8 +93,7 @@ namespace ProjectLucy.API.Controllers
             if (string.IsNullOrWhiteSpace(refreshTokenValue))
                 return BadRequest(new { Status = 400, Message = "Refresh token is required" });
 
-            var dto = new RefreshTokenRequest { RefreshToken = refreshTokenValue };
-            var result = await _authService.RefreshTokenAsync(dto);
+            var result = await _sender.Send(new RefreshTokenCommand(refreshTokenValue));
 
             if (result.Status != 200)
             {
@@ -92,7 +102,7 @@ namespace ProjectLucy.API.Controllers
             }
 
             // Rotate cookie with new refresh token
-            if (result.Data is LoginResponse loginResponse)
+            if (result.Data is AppLoginResponse loginResponse)
                 SetRefreshTokenCookie(loginResponse.RefreshToken);
 
             return Ok(result);
@@ -118,7 +128,7 @@ namespace ProjectLucy.API.Controllers
                 return Ok(new { Status = 200, Message = "Logged out successfully" });
             }
 
-            var result = await _authService.LogoutAsync(refreshTokenValue);
+            var result = await _sender.Send(new LogoutCommand(refreshTokenValue));
 
             // Always clear the cookie regardless of result
             Response.Cookies.Delete(RefreshTokenCookieName);

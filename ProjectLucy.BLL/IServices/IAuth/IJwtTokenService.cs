@@ -1,7 +1,7 @@
 using ProjectLucy.DAL.Entities;
 using System.Security.Claims;
 
-namespace ProjectLucy.BLL.IServices
+namespace ProjectLucy.BLL.IServices.IAuth
 {
     public interface IJwtTokenService
     {

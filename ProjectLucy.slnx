@@ -1,6 +1,7 @@
 <Solution>
   <Project Path="ProjectLucy.API/ProjectLucy.API.csproj" />
-  <Project Path="ProjectLucy.BLL/ProjectLucy.BLL.csproj" Id="6fe56b79-2dc4-470f-97be-a8b423ab4b40" />
-  <Project Path="ProjectLucy.DAL/ProjectLucy.DAL.csproj" Id="0136bd5c-ba22-4d5c-8ad4-558397ac3639" />
+  <Project Path="ProjectLucy.Application/ProjectLucy.Application.csproj" />
+  <Project Path="ProjectLucy.Domain/ProjectLucy.Domain.csproj" />
+  <Project Path="ProjectLucy.Infrastructure/ProjectLucy.Infrastructure.csproj" />
   <Project Path="ProjectLucy.Shared/ProjectLucy.Shared.csproj" Id="3230bac2-3912-470e-88e8-2be089c04fc8" />
 </Solution>

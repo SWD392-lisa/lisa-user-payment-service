@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
-using ProjectLucy.BLL.IServices;
+using ProjectLucy.BLL.IServices.IAuth;
 using ProjectLucy.BLL.Settings;
 using ProjectLucy.DAL.Entities;
 using System.IdentityModel.Tokens.Jwt;
@@ -8,7 +8,7 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace ProjectLucy.BLL.Services
+namespace ProjectLucy.BLL.Services.Auth
 {
     public class JwtTokenService : IJwtTokenService
     {

@@ -22,9 +22,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ProjectLucy.BLL\ProjectLucy.BLL.csproj" />
+    <ProjectReference Include="..\ProjectLucy.Application\ProjectLucy.Application.csproj" />
+    <ProjectReference Include="..\ProjectLucy.Infrastructure\ProjectLucy.Infrastructure.csproj" />
     <ProjectReference Include="..\ProjectLucy.Shared\ProjectLucy.Shared.csproj" />
-    <ProjectReference Include="..\ProjectLucy.DAL\ProjectLucy.DAL.csproj" />
   </ItemGroup>
 
   <ItemGroup>

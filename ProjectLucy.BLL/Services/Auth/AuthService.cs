@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using ProjectLucy.BLL.Base;
 using ProjectLucy.BLL.IServices;
+using ProjectLucy.BLL.IServices.IAuth;
 using ProjectLucy.BLL.Settings;
 using ProjectLucy.DAL.Base;
 using ProjectLucy.DAL.Context;
@@ -12,7 +13,7 @@ using ProjectLucy.Shared.Dtos.LoginDtos.Childs;
 using ProjectLucy.Shared.Dtos.RefreshTokenDtos;
 using ProjectLucy.Shared.Dtos.RegisterDtos;
 
-namespace ProjectLucy.BLL.Services
+namespace ProjectLucy.BLL.Services.Auth
 {
     public class AuthService : IAuthService
     {
@@ -160,10 +161,7 @@ namespace ProjectLucy.BLL.Services
 
             RegisterResponse response = new RegisterResponse
             {
-                UserId = newUser.UserId,
-                FullName = newUser.UserFullName,
-                Email = newUser.UserEmail,
-                Role = defaultRole.RoleName
+                IsSuccess = true
             };
 
             return new ServiceResult(201, "Registration successful", response);
