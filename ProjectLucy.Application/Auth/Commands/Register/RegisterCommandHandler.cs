@@ -18,7 +18,7 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, Result<Re
     private readonly IRoleRepository _roleRepo;
     private readonly IUnitOfWork _unitOfWork;
 
-    private const string DefaultRoleCode = "USER";
+    private const string DefaultRoleCode = "LUCY";
 
     public RegisterCommandHandler(
         IUserRepository userRepo,
