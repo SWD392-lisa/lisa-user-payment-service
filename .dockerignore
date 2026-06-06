@@ -1,0 +1,15 @@
+.git
+.gitignore
+.vs
+.idea
+.appdata
+**/bin
+**/obj
+**/TestResults
+**/*.user
+**/*.suo
+**/*.rsuser
+Dockerfile*
+docker-compose*.yml
+README.md
+guide.md
