@@ -1,4 +1,4 @@
-namespace ProjectLucy.Application.Auth.DTOs;
+namespace ProjectLucy.Application.DTOs;
 
 public class RegisterResponse
 {

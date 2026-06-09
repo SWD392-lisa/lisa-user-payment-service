@@ -9,7 +9,7 @@ using ProjectLucy.Shared.Dtos.LoginDtos;
 using ProjectLucy.Shared.Dtos.LogoutDtos;
 using ProjectLucy.Shared.Dtos.RefreshTokenDtos;
 using ProjectLucy.Shared.Dtos.RegisterDtos;
-using AppLoginResponse = ProjectLucy.Application.Auth.DTOs.LoginResponse;
+using AppLoginResponse = ProjectLucy.Application.DTOs.LoginResponse;
 
 namespace ProjectLucy.API.Controllers
 {

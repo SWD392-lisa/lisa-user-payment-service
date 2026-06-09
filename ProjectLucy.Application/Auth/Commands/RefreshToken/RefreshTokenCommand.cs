@@ -1,5 +1,5 @@
 using MediatR;
-using ProjectLucy.Application.Auth.DTOs;
+using ProjectLucy.Application.DTOs;
 using ProjectLucy.Application.Common;
 
 namespace ProjectLucy.Application.Auth.Commands.RefreshToken;

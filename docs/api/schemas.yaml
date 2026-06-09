@@ -112,11 +112,16 @@ RegisterRequest:
     password:
       type: string
       format: password
-      minLength: 6
+      minLength: 8
+      description: |
+        At least 8 characters and must contain:
+        - 1 uppercase letter
+        - 1 number
+        - 1 special character (non-alphanumeric, non-whitespace)
     confirmPassword:
       type: string
       format: password
-      minLength: 6
+      minLength: 8
     birthday:
       type: string
       format: date

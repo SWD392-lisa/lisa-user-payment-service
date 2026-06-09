@@ -46,33 +46,53 @@ paths:
                 created:
                   value:
                     status: 201
-                    message: "User registered successfully"
+                    message: "Registration successful"
                     data:
                       isSuccess: true
         "400":
-          description: Validation error
+          description: DTO-level validation error (DataAnnotations on RegisterRequest)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResultOfEmpty"
+        "422":
+          description: Business validation failed (FluentValidation). Includes duplicate email/phone.
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ResultOfValidation"
               examples:
-                mismatch:
+                emailDuplicated:
+                  summary: Email is already registered
                   value:
-                    status: 400
+                    status: 422
+                    message: "Validation failed"
+                    errors:
+                      - "Email is already registered"
+                phoneDuplicated:
+                  summary: Phone number is already registered
+                  value:
+                    status: 422
+                    message: "Validation failed"
+                    errors:
+                      - "Phone number is already registered"
+                passwordMismatch:
+                  summary: Passwords do not match
+                  value:
+                    status: 422
                     message: "Validation failed"
                     errors:
                       - "Passwords do not match"
-        "409":
-          description: Email or phone number already in use
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/ResultOfEmpty"
-              examples:
-                conflict:
+                passwordTooWeak:
+                  summary: Password fails complexity rules
                   value:
-                    status: 409
-                    message: "Email already exists"
+                    status: 422
+                    message: "Validation failed"
+                    errors:
+                      - "Password must be at least 8 characters"
+                      - "Password must contain at least 1 uppercase letter"
+                      - "Password must contain at least 1 number"
+                      - "Password must contain at least 1 special character"
         "500":
           $ref: "#/components/responses/InternalError"
 
@@ -104,16 +124,20 @@ components:
         password:
           type: string
           format: password
-          minLength: 6
+          minLength: 8
+          description: |
+            At least 8 characters and must contain:
+            - 1 uppercase letter
+            - 1 number
+            - 1 special character (non-alphanumeric, non-whitespace)
         confirmPassword:
           type: string
           format: password
-          minLength: 6
+          minLength: 8
           description: Must match `password`
         birthday:
           type: string
           format: date
-          example: "2000-01-15"
         phoneNumber:
           type: string
           maxLength: 30

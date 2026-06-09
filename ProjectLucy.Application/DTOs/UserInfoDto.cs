@@ -1,4 +1,4 @@
-namespace ProjectLucy.Application.Auth.DTOs;
+namespace ProjectLucy.Application.DTOs;
 
 /// <summary>
 /// Basic user info embedded in login / refresh-token responses.

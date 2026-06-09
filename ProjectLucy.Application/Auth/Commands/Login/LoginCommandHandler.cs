@@ -1,5 +1,5 @@
 using MediatR;
-using ProjectLucy.Application.Auth.DTOs;
+using ProjectLucy.Application.DTOs;
 using ProjectLucy.Application.Common;
 using ProjectLucy.Application.Common.Exceptions;
 using ProjectLucy.Application.Interfaces;

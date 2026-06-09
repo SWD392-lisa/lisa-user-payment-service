@@ -1,5 +1,5 @@
 using MediatR;
-using ProjectLucy.Application.Auth.DTOs;
+using ProjectLucy.Application.DTOs;
 using ProjectLucy.Application.Common;
 using ProjectLucy.Application.Common.Exceptions;
 using ProjectLucy.Application.Interfaces;
@@ -32,18 +32,11 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, Result<Re
 
     public async Task<Result<RegisterResponse>> Handle(RegisterCommand cmd, CancellationToken ct)
     {
-        // 1. Check duplicate email
-        if (await _userRepo.ExistsByEmailAsync(cmd.Email.ToLower().Trim(), ct))
-            throw new ConflictException("Email is already registered");
+        // Note: duplicate email/phone are caught by RegisterCommandValidator
+        // before reaching the handler. The unique indexes on user_email and
+        // user_phone_number in the database still protect against race conditions.
 
-        // 2. Check duplicate phone (if provided)
-        if (!string.IsNullOrWhiteSpace(cmd.PhoneNumber))
-        {
-            if (await _userRepo.ExistsByPhoneAsync(cmd.PhoneNumber.Trim(), ct))
-                throw new ConflictException("Phone number is already registered");
-        }
-
-        // 3. Get default role
+        // 1. Get default role
         var defaultRole = await _roleRepo.GetByCodeAsync(DefaultRoleCode, ct);
         if (defaultRole is null)
             throw new ServerException($"Default role '{DefaultRoleCode}' not found. Please seed roles first.");
