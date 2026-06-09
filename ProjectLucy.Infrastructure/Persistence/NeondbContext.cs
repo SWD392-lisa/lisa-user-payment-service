@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using ProjectLucy.Domain.Entities;
+using PaymentEntity = ProjectLucy.Domain.Entities.Payment;
 
 namespace ProjectLucy.Infrastructure.Persistence;
 
@@ -17,6 +18,7 @@ public partial class NeondbContext : DbContext
     public virtual DbSet<RefreshToken> RefreshTokens { get; set; }
     public virtual DbSet<Role> Roles { get; set; }
     public virtual DbSet<User> Users { get; set; }
+    public virtual DbSet<PaymentEntity> Payments { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
@@ -117,7 +119,51 @@ public partial class NeondbContext : DbContext
                 .HasConstraintName("fk_user_role");
         });
 
+        ConfigurePayment(modelBuilder);
+
         OnModelCreatingPartial(modelBuilder);
+    }
+
+    private void ConfigurePayment(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<PaymentEntity>(entity =>
+        {
+            entity.HasKey(e => e.PaymentId).HasName("payment_pkey");
+
+            entity.ToTable("payment");
+
+            entity.HasIndex(e => e.OrderInvoiceNumber, "idx_payment_invoice").IsUnique();
+            entity.HasIndex(e => e.TransactionId, "idx_payment_transaction_id");
+
+            entity.Property(e => e.PaymentId)
+                .ValueGeneratedNever()
+                .HasColumnName("payment_id");
+            entity.Property(e => e.OrderInvoiceNumber)
+                .IsRequired()
+                .HasMaxLength(100)
+                .HasColumnName("order_invoice_number");
+            entity.Property(e => e.OrderAmount)
+                .HasColumnName("order_amount");
+            entity.Property(e => e.OrderDescription)
+                .IsRequired()
+                .HasMaxLength(255)
+                .HasColumnName("order_description");
+            entity.Property(e => e.CustomerId)
+                .HasMaxLength(100)
+                .HasColumnName("customer_id");
+            entity.Property(e => e.Status)
+                .IsRequired()
+                .HasMaxLength(20)
+                .HasDefaultValue("PENDING")
+                .HasColumnName("status");
+            entity.Property(e => e.TransactionId)
+                .HasMaxLength(100)
+                .HasColumnName("transaction_id");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("CURRENT_TIMESTAMP")
+                .HasColumnName("created_at");
+            entity.Property(e => e.UpdatedAt).HasColumnName("updated_at");
+        });
     }
 
     partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
