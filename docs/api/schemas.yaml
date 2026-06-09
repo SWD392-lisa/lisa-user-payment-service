@@ -1,0 +1,163 @@
+# Shared OpenAPI schemas for the ProjectLucy API.
+# Imported by both the root openapi.yaml and each endpoint file.
+
+ResultOfEmpty:
+  type: object
+  required: [status, message]
+  properties:
+    status:
+      type: integer
+      description: HTTP-style status code (200, 400, 401, 409, 500, ...).
+    message:
+      type: string
+    data:
+      nullable: true
+    errors:
+      type: array
+      items:
+        type: string
+
+ResultOfValidation:
+  type: object
+  required: [status, message, errors]
+  properties:
+    status:
+      type: integer
+      example: 400
+    message:
+      type: string
+      example: "Validation failed"
+    data:
+      nullable: true
+    errors:
+      type: array
+      items:
+        type: string
+
+LoginRequest:
+  type: object
+  required: [email, password]
+  properties:
+    email:
+      type: string
+      format: email
+      maxLength: 255
+    password:
+      type: string
+      format: password
+      minLength: 6
+
+LoginResponse:
+  type: object
+  required: [accessToken, refreshToken, accessTokenExpiry, user]
+  properties:
+    accessToken:
+      type: string
+    refreshToken:
+      type: string
+    accessTokenExpiry:
+      type: string
+      format: date-time
+    user:
+      $ref: "#/UserInfo"
+
+UserInfo:
+  type: object
+  required: [userId, fullName, email, roleCode, roleName]
+  properties:
+    userId:
+      type: string
+      format: uuid
+    fullName:
+      type: string
+      maxLength: 255
+    email:
+      type: string
+      format: email
+      maxLength: 255
+    roleCode:
+      type: string
+      maxLength: 50
+    roleName:
+      type: string
+      maxLength: 100
+
+ResultOfLoginResponse:
+  type: object
+  required: [status, message, data]
+  properties:
+    status:
+      type: integer
+      example: 200
+    message:
+      type: string
+    data:
+      $ref: "#/LoginResponse"
+    errors:
+      type: array
+      items:
+        type: string
+
+RegisterRequest:
+  type: object
+  required: [fullName, email, password, confirmPassword, birthday]
+  properties:
+    fullName:
+      type: string
+      maxLength: 255
+    email:
+      type: string
+      format: email
+      maxLength: 255
+    password:
+      type: string
+      format: password
+      minLength: 6
+    confirmPassword:
+      type: string
+      format: password
+      minLength: 6
+    birthday:
+      type: string
+      format: date
+    phoneNumber:
+      type: string
+      maxLength: 30
+      nullable: true
+
+RegisterResponse:
+  type: object
+  required: [isSuccess]
+  properties:
+    isSuccess:
+      type: boolean
+
+ResultOfRegisterResponse:
+  type: object
+  required: [status, message, data]
+  properties:
+    status:
+      type: integer
+      example: 201
+    message:
+      type: string
+    data:
+      $ref: "#/RegisterResponse"
+    errors:
+      type: array
+      items:
+        type: string
+
+RefreshTokenRequest:
+  type: object
+  required: [refreshToken]
+  properties:
+    refreshToken:
+      type: string
+
+LogoutRequest:
+  type: object
+  properties:
+    refreshToken:
+      type: string
+      nullable: true

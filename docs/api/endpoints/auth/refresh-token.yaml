@@ -1,0 +1,179 @@
+openapi: 3.0.3
+info:
+  title: ProjectLucy API - Refresh Token
+  version: 1.0.0
+  description: |
+    POST /api/Auth/refresh-token
+    Issues a new access token using a valid refresh token.
+    - The server prefers reading the refresh token from the HttpOnly cookie
+      (`refreshToken`) set by `/api/auth/login`.
+    - If the cookie is missing (e.g. cross-tab flow), the token can be sent
+      in the request body instead.
+    - On success, a new refresh token cookie is rotated and returned.
+tags:
+  - Auth
+
+servers:
+  - url: http://localhost:8080
+    description: Local Docker container
+  - url: http://localhost:5149
+    description: Local development
+
+paths:
+  /api/auth/refresh-token:
+    post:
+      tags: [Auth]
+      summary: Refresh the access token
+      operationId: refreshToken
+      parameters:
+        - in: cookie
+          name: refreshToken
+          required: false
+          schema:
+            type: string
+          description: HttpOnly cookie set by `/api/auth/login`. Preferred over body.
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RefreshTokenRequest"
+            examples:
+              bodyFallback:
+                value:
+                  refreshToken: "rt_8f3b1c0a-2f4d-4d4f-9c1a-1a2b3c4d5e6f"
+      responses:
+        "200":
+          description: Token refreshed. New refresh token cookie is set.
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
+              description: Rotated `refreshToken` HttpOnly cookie.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResultOfLoginResponse"
+              examples:
+                success:
+                  value:
+                    status: 200
+                    message: "Token refreshed"
+                    data:
+                      accessToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                      refreshToken: "rt_NEW-uuid-replaces-old-token"
+                      accessTokenExpiry: "2026-06-06T12:30:00Z"
+                      user:
+                        userId: "1f0a8b3e-2b6c-4a5b-9c1a-7c8d9e0f1234"
+                        fullName: "Nguyen Van A"
+                        email: "[email protected]"
+                        roleCode: "CUSTOMER"
+                        roleName: "Customer"
+        "400":
+          description: Refresh token is required (neither cookie nor body present)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResultOfEmpty"
+              examples:
+                missing:
+                  value:
+                    status: 400
+                    message: "Refresh token is required"
+        "401":
+          description: Refresh token is invalid, expired, or revoked
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResultOfEmpty"
+              examples:
+                invalid:
+                  value:
+                    status: 401
+                    message: "Invalid or expired refresh token"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+components:
+  responses:
+    InternalError:
+      description: Unexpected server error
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ResultOfEmpty"
+          examples:
+            serverError:
+              value:
+                status: 500
+                message: "An unexpected error occurred"
+  schemas:
+    RefreshTokenRequest:
+      type: object
+      required: [refreshToken]
+      properties:
+        refreshToken:
+          type: string
+          description: Fallback when the HttpOnly cookie is not available.
+    LoginResponse:
+      type: object
+      required: [accessToken, refreshToken, accessTokenExpiry, user]
+      properties:
+        accessToken:
+          type: string
+        refreshToken:
+          type: string
+        accessTokenExpiry:
+          type: string
+          format: date-time
+        user:
+          $ref: "#/components/schemas/UserInfo"
+    UserInfo:
+      type: object
+      required: [userId, fullName, email, roleCode, roleName]
+      properties:
+        userId:
+          type: string
+          format: uuid
+        fullName:
+          type: string
+          maxLength: 255
+        email:
+          type: string
+          format: email
+          maxLength: 255
+        roleCode:
+          type: string
+          maxLength: 50
+        roleName:
+          type: string
+          maxLength: 100
+    ResultOfLoginResponse:
+      type: object
+      required: [status, message, data]
+      properties:
+        status:
+          type: integer
+          example: 200
+        message:
+          type: string
+        data:
+          $ref: "#/components/schemas/LoginResponse"
+        errors:
+          type: array
+          items:
+            type: string
+    ResultOfEmpty:
+      type: object
+      required: [status, message]
+      properties:
+        status:
+          type: integer
+        message:
+          type: string
+        data:
+          nullable: true
+        errors:
+          type: array
+          items:
+            type: string

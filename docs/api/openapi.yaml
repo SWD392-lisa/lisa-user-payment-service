@@ -1,0 +1,37 @@
+openapi: 3.0.3
+info:
+  title: ProjectLucy API
+  version: 1.0.0
+  description: |
+    REST API for the ProjectLucy user & payment service.
+    Built with ASP.NET Core 8 + Clean Architecture (CQRS via MediatR).
+servers:
+  - url: http://localhost:8080
+    description: Local Docker container
+  - url: http://localhost:5149
+    description: Local development (HTTP profile)
+
+tags:
+  - name: Auth
+    description: Authentication & refresh-token endpoints
+
+paths:
+  /api/auth/login:
+    $ref: "./endpoints/Auth/login.yaml"
+  /api/auth/register:
+    $ref: "./endpoints/Auth/register.yaml"
+  /api/auth/refresh-token:
+    $ref: "./endpoints/Auth/refresh-token.yaml"
+  /api/auth/logout:
+    $ref: "./endpoints/Auth/logout.yaml"
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Paste the JWT access token returned by /api/auth/login
+
+  schemas:
+    $ref: "./schemas.yaml"

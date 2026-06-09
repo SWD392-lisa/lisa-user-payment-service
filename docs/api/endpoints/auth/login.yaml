@@ -1,0 +1,202 @@
+openapi: 3.0.3
+info:
+  title: ProjectLucy API - Login
+  version: 1.0.0
+  description: |
+    POST /api/Auth/login
+    Authenticates a user with email + password.
+    - Returns the JWT access token in the response body.
+    - Sets the refresh token in an HttpOnly, Secure, SameSite=Strict cookie
+      scoped to `/api/auth`.
+tags:
+  - Auth
+
+servers:
+  - url: http://localhost:8080
+    description: Local Docker container
+  - url: http://localhost:5149
+    description: Local development
+
+paths:
+  /api/auth/login:
+    post:
+      tags: [Auth]
+      summary: Login with email and password
+      operationId: login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+            examples:
+              valid:
+                summary: Valid credentials
+                value:
+                  email: "[email protected]"
+                  password: "P@ssw0rd123"
+      responses:
+        "200":
+          description: Login successful. Access token returned in body; refresh token set in HttpOnly cookie.
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
+              description: |
+                `refreshToken=<jwt>; HttpOnly; Secure; SameSite=Strict; Path=/api/auth; Max-Age=604800`
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResultOfLoginResponse"
+              examples:
+                success:
+                  value:
+                    status: 200
+                    message: "Login successful"
+                    data:
+                      accessToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                      refreshToken: "rt_8f3b1c0a-2f4d-4d4f-9c1a-1a2b3c4d5e6f"
+                      accessTokenExpiry: "2026-06-06T10:15:00Z"
+                      user:
+                        userId: "1f0a8b3e-2b6c-4a5b-9c1a-7c8d9e0f1234"
+                        fullName: "Nguyen Van A"
+                        email: "[email protected]"
+                        roleCode: "CUSTOMER"
+                        roleName: "Customer"
+        "400":
+          description: Validation error (missing/invalid email or password)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResultOfValidation"
+              examples:
+                validation:
+                  value:
+                    status: 400
+                    message: "Validation failed"
+                    errors:
+                      - "Email is required"
+                      - "Password must be at least 6 characters"
+        "401":
+          description: Invalid email or password
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResultOfEmpty"
+              examples:
+                unauthorized:
+                  value:
+                    status: 401
+                    message: "Invalid email or password"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+components:
+  responses:
+    InternalError:
+      description: Unexpected server error
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ResultOfEmpty"
+          examples:
+            serverError:
+              value:
+                status: 500
+                message: "An unexpected error occurred"
+  schemas:
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+          maxLength: 255
+          description: User email
+        password:
+          type: string
+          format: password
+          minLength: 6
+          description: Plain-text password (sent over HTTPS, hashed server-side)
+    LoginResponse:
+      type: object
+      required: [accessToken, refreshToken, accessTokenExpiry, user]
+      properties:
+        accessToken:
+          type: string
+          description: JWT access token (short-lived, default 15 minutes)
+        refreshToken:
+          type: string
+          description: Long-lived refresh token (default 7 days). Mirrors the HttpOnly cookie.
+        accessTokenExpiry:
+          type: string
+          format: date-time
+        user:
+          $ref: "#/components/schemas/UserInfo"
+    UserInfo:
+      type: object
+      required: [userId, fullName, email, roleCode, roleName]
+      properties:
+        userId:
+          type: string
+          format: uuid
+        fullName:
+          type: string
+          maxLength: 255
+        email:
+          type: string
+          format: email
+          maxLength: 255
+        roleCode:
+          type: string
+          maxLength: 50
+        roleName:
+          type: string
+          maxLength: 100
+    ResultOfLoginResponse:
+      type: object
+      required: [status, message, data]
+      properties:
+        status:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: "Login successful"
+        data:
+          $ref: "#/components/schemas/LoginResponse"
+        errors:
+          type: array
+          items:
+            type: string
+    ResultOfEmpty:
+      type: object
+      required: [status, message]
+      properties:
+        status:
+          type: integer
+        message:
+          type: string
+        data:
+          nullable: true
+        errors:
+          type: array
+          items:
+            type: string
+    ResultOfValidation:
+      type: object
+      required: [status, message, errors]
+      properties:
+        status:
+          type: integer
+          example: 400
+        message:
+          type: string
+          example: "Validation failed"
+        data:
+          nullable: true
+        errors:
+          type: array
+          items:
+            type: string

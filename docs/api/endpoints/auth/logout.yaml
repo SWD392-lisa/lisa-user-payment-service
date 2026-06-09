@@ -1,0 +1,102 @@
+openapi: 3.0.3
+info:
+  title: ProjectLucy API - Logout
+  version: 1.0.0
+  description: |
+    POST /api/Auth/logout
+    Revokes the supplied refresh token and clears the HttpOnly cookie.
+    - The server prefers the `refreshToken` HttpOnly cookie.
+    - The body is optional and acts as a fallback.
+    - The endpoint always clears the cookie, even if no token was provided.
+tags:
+  - Auth
+
+servers:
+  - url: http://localhost:8080
+    description: Local Docker container
+  - url: http://localhost:5149
+    description: Local development
+
+paths:
+  /api/auth/logout:
+    post:
+      tags: [Auth]
+      summary: Logout and revoke refresh token
+      operationId: logout
+      parameters:
+        - in: cookie
+          name: refreshToken
+          required: false
+          schema:
+            type: string
+          description: HttpOnly cookie. Preferred over body.
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LogoutRequest"
+            examples:
+              bodyFallback:
+                value:
+                  refreshToken: "rt_8f3b1c0a-2f4d-4d4f-9c1a-1a2b3c4d5e6f"
+      responses:
+        "200":
+          description: Logout successful. Refresh token cookie is cleared.
+          headers:
+            Set-Cookie:
+              schema:
+                type: string
+              description: "Expired `refreshToken` cookie (Max-Age=0)."
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResultOfEmpty"
+              examples:
+                success:
+                  value:
+                    status: 200
+                    message: "Logged out successfully"
+                successNoToken:
+                  summary: No token found, still 200 (cookie cleared)
+                  value:
+                    status: 200
+                    message: "Logged out successfully"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+components:
+  responses:
+    InternalError:
+      description: Unexpected server error
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ResultOfEmpty"
+          examples:
+            serverError:
+              value:
+                status: 500
+                message: "An unexpected error occurred"
+  schemas:
+    LogoutRequest:
+      type: object
+      properties:
+        refreshToken:
+          type: string
+          nullable: true
+          description: Optional fallback. Server prefers the HttpOnly cookie.
+    ResultOfEmpty:
+      type: object
+      required: [status, message]
+      properties:
+        status:
+          type: integer
+        message:
+          type: string
+        data:
+          nullable: true
+        errors:
+          type: array
+          items:
+            type: string
