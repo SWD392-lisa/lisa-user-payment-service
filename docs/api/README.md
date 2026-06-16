@@ -9,11 +9,14 @@ docs/api/
 ├── openapi.yaml                    # Root spec - import this into Swagger UI / Postman
 ├── schemas.yaml                    # Shared component schemas (Result wrappers, DTOs)
 └── endpoints/
-    └── auth/
-        ├── login.yaml              # POST /api/auth/login
-        ├── register.yaml           # POST /api/auth/register
-        ├── refresh-token.yaml      # POST /api/auth/refresh-token
-        └── logout.yaml             # POST /api/auth/logout
+    ├── auth/
+    │   ├── login.yaml              # POST /api/auth/login
+    │   ├── register.yaml           # POST /api/auth/register
+    │   ├── refresh-token.yaml      # POST /api/auth/refresh-token
+    │   └── logout.yaml             # POST /api/auth/logout
+    └── payment/
+        ├── create.yaml             # POST /api/payment/create  (build SePay checkout form)
+        └── ipn.yaml                # POST /api/payment/ipn     (SePay → backend webhook)
 ```
 
 ## Endpoints
@@ -24,6 +27,8 @@ docs/api/
 | POST   | `/api/auth/register`       | Create a new user account                  | No   |
 | POST   | `/api/auth/refresh-token`  | Rotate access token using refresh token    | No   |
 | POST   | `/api/auth/logout`         | Revoke refresh token and clear cookie      | No   |
+| POST   | `/api/payment/create`      | Build a signed SePay checkout form payload | No   |
+| POST   | `/api/payment/ipn`         | SePay webhook — verify & update payment    | No   |
 
 ## Response wrapper
 

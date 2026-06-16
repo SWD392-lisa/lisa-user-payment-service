@@ -1,22 +1,69 @@
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
+
 namespace ProjectLucy.Domain.Entities;
 
-/// <summary>
-/// Core user entity. No EF or framework dependencies here.
-/// EF configuration lives in Infrastructure/Persistence.
-/// </summary>
-public class User
+[Table("user")]
+[Index("UserEmail", Name = "idx_user_email")]
+[Index("UserPhoneNumber", Name = "idx_user_phone")]
+[Index("UserEmail", Name = "user_user_email_key", IsUnique = true)]
+[Index("UserPhoneNumber", Name = "user_user_phone_number_key", IsUnique = true)]
+public partial class User
 {
+    [Key]
+    [Column("user_id")]
     public Guid UserId { get; set; }
+
+    [Column("user_full_name")]
+    [StringLength(255)]
     public string UserFullName { get; set; } = null!;
+
+    [Column("user_birthday")]
     public DateOnly UserBirthday { get; set; }
+
+    [Column("user_hash_password")]
+    [StringLength(255)]
     public string UserHashPassword { get; set; } = null!;
+
+    [Column("user_email")]
+    [StringLength(255)]
     public string UserEmail { get; set; } = null!;
+
+    [Column("user_phone_number")]
+    [StringLength(30)]
     public string? UserPhoneNumber { get; set; }
+
+    [Column("created_at")]
     public DateTime? CreatedAt { get; set; }
+
+    [Column("updated_at")]
     public DateTime? UpdatedAt { get; set; }
+
+    [Column("role_id")]
     public int RoleId { get; set; }
 
-    // Navigation — kept for EF convenience; Infrastructure owns the mapping
-    public virtual Role Role { get; set; } = null!;
+    [InverseProperty("Receiver")]
+    public virtual ICollection<GiftTransaction> GiftTransactionReceivers { get; set; } = new List<GiftTransaction>();
+
+    [InverseProperty("Sender")]
+    public virtual ICollection<GiftTransaction> GiftTransactionSenders { get; set; } = new List<GiftTransaction>();
+
+    [InverseProperty("User")]
     public virtual ICollection<RefreshToken> RefreshTokens { get; set; } = new List<RefreshToken>();
+
+    [ForeignKey("RoleId")]
+    [InverseProperty("Users")]
+    public virtual Role Role { get; set; } = null!;
+
+    [InverseProperty("User")]
+    public virtual ICollection<RoleUpgradeOrder> RoleUpgradeOrders { get; set; } = new List<RoleUpgradeOrder>();
+
+    [InverseProperty("User")]
+    public virtual ICollection<Transaction> Transactions { get; set; } = new List<Transaction>();
+
+    [InverseProperty("User")]
+    public virtual Wallet? Wallet { get; set; }
 }

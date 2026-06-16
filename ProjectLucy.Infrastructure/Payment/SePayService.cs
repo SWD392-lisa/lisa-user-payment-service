@@ -70,33 +70,43 @@ public class SePayService : ISePayService
             SuccessUrl = fields["success_url"],
             ErrorUrl = fields["error_url"],
             CancelUrl = fields["cancel_url"],
-            Signature = SignFields(AllowedCheckoutFields, fields),
+            Signature = SignFields(AllowedCheckoutFields, fields, includeAllInOrder: true),
             IsSandbox = _options.IsSandbox,
         };
     }
 
     public string CreateSignature(IDictionary<string, string> fields)
-        => SignFields(AllowedCheckoutFields, fields);
+        => SignFields(AllowedCheckoutFields, fields, includeAllInOrder: true);
 
     public bool VerifyIpnSignature(IDictionary<string, string> fields, string providedSignature)
     {
         if (string.IsNullOrEmpty(providedSignature))
             return false;
 
-        var expected = SignFields(AllowedIpnFields, fields);
+        var expected = SignFields(AllowedIpnFields, fields, includeAllInOrder: false);
         // Constant-time comparison to prevent timing attacks
         return CryptographicOperations.FixedTimeEquals(
             Encoding.UTF8.GetBytes(expected),
             Encoding.UTF8.GetBytes(providedSignature));
     }
 
-    private string SignFields(string[] allowedFields, IDictionary<string, string> fields)
+    /// <summary>
+    /// Builds the HMAC-SHA256 signature over the given fields.
+    /// </summary>
+    /// <param name="includeAllInOrder">
+    /// When true (checkout, per PaymentAPI_Documentation.md), every allowed field is
+    /// included in the fixed order with an empty value for missing keys. When false
+    /// (IPN), only non-empty fields present in the payload are signed.
+    /// </param>
+    private string SignFields(string[] allowedFields, IDictionary<string, string> fields, bool includeAllInOrder)
     {
-        var parts = allowedFields
-            .Where(f => fields.TryGetValue(f, out var v) && !string.IsNullOrEmpty(v))
-            .Select(f => $"{f}={fields[f]}");
+        var selected = includeAllInOrder
+            ? allowedFields.Select(f => $"{f}={(fields.TryGetValue(f, out var v) ? v : string.Empty)}")
+            : allowedFields
+                .Where(f => fields.TryGetValue(f, out var v) && !string.IsNullOrEmpty(v))
+                .Select(f => $"{f}={fields[f]}");
 
-        var signedString = string.Join(",", parts);
+        var signedString = string.Join(",", selected);
 
         var keyBytes = Encoding.UTF8.GetBytes(_options.SecretKey);
         var dataBytes = Encoding.UTF8.GetBytes(signedString);

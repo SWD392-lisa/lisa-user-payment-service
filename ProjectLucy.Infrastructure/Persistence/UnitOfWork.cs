@@ -4,9 +4,9 @@ namespace ProjectLucy.Infrastructure.Persistence;
 
 public class UnitOfWork : IUnitOfWork
 {
-    private readonly NeondbContext _context;
+    private readonly NeonDbContext _context;
 
-    public UnitOfWork(NeondbContext context)
+    public UnitOfWork(NeonDbContext context)
     {
         _context = context;
     }

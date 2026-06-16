@@ -12,8 +12,8 @@ using ProjectLucy.Infrastructure.Persistence;
 namespace ProjectLucy.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(NeonDbContext))]
-    [Migration("20260609173731_InitialCreate")]
-    partial class InitialCreate
+    [Migration("20260614092045_AddPaymentTable")]
+    partial class AddPaymentTable
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -24,6 +24,67 @@ namespace ProjectLucy.Infrastructure.Persistence.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
+
+            modelBuilder.Entity("ProjectLucy.Domain.Entities.Payment", b =>
+                {
+                    b.Property<Guid>("PaymentId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("payment_id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at")
+                        .HasDefaultValueSql("CURRENT_TIMESTAMP");
+
+                    b.Property<string>("CustomerId")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("customer_id");
+
+                    b.Property<long>("OrderAmount")
+                        .HasColumnType("bigint")
+                        .HasColumnName("order_amount");
+
+                    b.Property<string>("OrderDescription")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("order_description");
+
+                    b.Property<string>("OrderInvoiceNumber")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("order_invoice_number");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasDefaultValue("PENDING")
+                        .HasColumnName("status");
+
+                    b.Property<string>("TransactionId")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("transaction_id");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.HasKey("PaymentId")
+                        .HasName("payment_pkey");
+
+                    b.HasIndex(new[] { "OrderInvoiceNumber" }, "idx_payment_invoice")
+                        .IsUnique();
+
+                    b.HasIndex(new[] { "TransactionId" }, "idx_payment_transaction_id");
+
+                    b.ToTable("payment", (string)null);
+                });
 
             modelBuilder.Entity("ProjectLucy.Domain.Entities.RefreshToken", b =>
                 {
@@ -111,6 +172,70 @@ namespace ProjectLucy.Infrastructure.Persistence.Migrations
                     b.ToTable("role", (string)null);
                 });
 
+            modelBuilder.Entity("ProjectLucy.Domain.Entities.RolePrice", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime?>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at")
+                        .HasDefaultValueSql("now()");
+
+                    b.Property<string>("Currency")
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)")
+                        .HasColumnName("currency")
+                        .HasDefaultValueSql("'VND'::character varying");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("text")
+                        .HasColumnName("description");
+
+                    b.Property<TimeSpan?>("Duration")
+                        .HasColumnType("interval")
+                        .HasColumnName("duration");
+
+                    b.Property<bool?>("IsActive")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(true)
+                        .HasColumnName("is_active");
+
+                    b.Property<decimal>("Price")
+                        .HasPrecision(12, 2)
+                        .HasColumnType("numeric(12,2)")
+                        .HasColumnName("price");
+
+                    b.Property<int>("RoleId")
+                        .HasColumnType("integer")
+                        .HasColumnName("role_id");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at")
+                        .HasDefaultValueSql("now()");
+
+                    b.HasKey("Id")
+                        .HasName("role_price_pkey");
+
+                    b.HasIndex(new[] { "IsActive" }, "idx_role_price_active");
+
+                    b.HasIndex(new[] { "RoleId" }, "idx_role_price_role_id");
+
+                    b.ToTable("role_price", null, t =>
+                        {
+                            t.ExcludeFromMigrations();
+                        });
+                });
+
             modelBuilder.Entity("ProjectLucy.Domain.Entities.User", b =>
                 {
                     b.Property<Guid>("UserId")
@@ -188,6 +313,18 @@ namespace ProjectLucy.Infrastructure.Persistence.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("ProjectLucy.Domain.Entities.RolePrice", b =>
+                {
+                    b.HasOne("ProjectLucy.Domain.Entities.Role", "Role")
+                        .WithMany("RolePrices")
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("role_price_role_id_fkey");
+
+                    b.Navigation("Role");
+                });
+
             modelBuilder.Entity("ProjectLucy.Domain.Entities.User", b =>
                 {
                     b.HasOne("ProjectLucy.Domain.Entities.Role", "Role")
@@ -202,6 +339,8 @@ namespace ProjectLucy.Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("ProjectLucy.Domain.Entities.Role", b =>
                 {
+                    b.Navigation("RolePrices");
+
                     b.Navigation("Users");
                 });
 

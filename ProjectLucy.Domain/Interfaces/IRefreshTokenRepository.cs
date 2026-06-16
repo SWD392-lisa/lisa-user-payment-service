@@ -1,3 +1,4 @@
+
 using ProjectLucy.Domain.Entities;
 
 namespace ProjectLucy.Domain.Interfaces;

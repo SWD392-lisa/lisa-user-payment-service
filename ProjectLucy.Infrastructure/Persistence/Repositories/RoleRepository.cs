@@ -6,9 +6,9 @@ namespace ProjectLucy.Infrastructure.Persistence.Repositories;
 
 public class RoleRepository : IRoleRepository
 {
-    private readonly NeondbContext _context;
+    private readonly NeonDbContext _context;
 
-    public RoleRepository(NeondbContext context)
+    public RoleRepository(NeonDbContext context)
     {
         _context = context;
     }

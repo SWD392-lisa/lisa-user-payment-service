@@ -6,9 +6,9 @@ namespace ProjectLucy.Infrastructure.Persistence.Repositories;
 
 public class RefreshTokenRepository : IRefreshTokenRepository
 {
-    private readonly NeondbContext _context;
+    private readonly NeonDbContext _context;
 
-    public RefreshTokenRepository(NeondbContext context)
+    public RefreshTokenRepository(NeonDbContext context)
     {
         _context = context;
     }

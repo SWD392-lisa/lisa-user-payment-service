@@ -6,9 +6,9 @@ namespace ProjectLucy.Infrastructure.Persistence.Repositories;
 
 public class UserRepository : IUserRepository
 {
-    private readonly NeondbContext _context;
+    private readonly NeonDbContext _context;
 
-    public UserRepository(NeondbContext context)
+    public UserRepository(NeonDbContext context)
     {
         _context = context;
     }

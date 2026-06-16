@@ -1,0 +1,157 @@
+openapi: 3.0.3
+info:
+  title: ProjectLucy API - SePay IPN Webhook
+  version: 1.0.0
+  description: |
+    POST /api/payment/ipn
+    SePay calls this endpoint after processing a payment. The signature is verified
+    first; an invalid signature is rejected with 403. The endpoint is idempotent
+    — re-delivered transaction ids are silently ignored.
+
+    **You should never call this endpoint from the frontend.** It is a webhook
+    target for SePay only.
+tags:
+  - Payment
+
+servers:
+  - url: http://localhost:8080
+    description: Local Docker container
+  - url: http://localhost:5149
+    description: Local development
+
+paths:
+  /api/payment/ipn:
+    post:
+      tags: [Payment]
+      summary: Receive SePay IPN callback
+      operationId: paymentIpn
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/IpnRequest"
+            examples:
+              success:
+                value:
+                  orderInvoiceNumber: "INV_20240101_001"
+                  transactionStatus: "SUCCESS"
+                  transactionId: "TXN_ABC123"
+                  orderAmount: "100000"
+                  paymentMethod: "BANK_TRANSFER"
+                  signature: "a1b2c3d4e5f6g7h8..."
+      responses:
+        "200":
+          description: IPN accepted (or already processed — idempotent).
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResultOfEmpty"
+              examples:
+                processed:
+                  value:
+                    status: 200
+                    message: "IPN processed"
+                idempotent:
+                  summary: Transaction id was already processed.
+                  value:
+                    status: 200
+                    message: "IPN already processed (idempotent)"
+        "400":
+          description: DTO-level validation error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResultOfEmpty"
+        "403":
+          description: Signature verification failed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResultOfEmpty"
+              examples:
+                invalidSignature:
+                  value:
+                    status: 403
+                    message: "Invalid IPN signature"
+        "404":
+          description: No payment row matches the given invoice number
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResultOfEmpty"
+              examples:
+                notFound:
+                  value:
+                    status: 404
+                    message: "Payment with invoice 'INV_20240101_001' was not found"
+        "422":
+          description: Business validation failed (missing required IPN fields)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResultOfValidation"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+components:
+  responses:
+    InternalError:
+      description: Unexpected server error
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ResultOfEmpty"
+          examples:
+            serverError:
+              value:
+                status: 500
+                message: "An unexpected error occurred"
+  schemas:
+    IpnRequest:
+      type: object
+      required: [orderInvoiceNumber, transactionStatus, signature]
+      properties:
+        orderInvoiceNumber:
+          type: string
+        transactionStatus:
+          type: string
+          description: One of SUCCESS, FAILED, CANCELLED.
+        transactionId:
+          type: string
+          nullable: true
+        orderAmount:
+          type: string
+          nullable: true
+        paymentMethod:
+          type: string
+          nullable: true
+        signature:
+          type: string
+    ResultOfEmpty:
+      type: object
+      required: [status, message]
+      properties:
+        status:
+          type: integer
+        message:
+          type: string
+        data:
+          nullable: true
+        errors:
+          type: array
+          items:
+            type: string
+    ResultOfValidation:
+      type: object
+      required: [status, message, errors]
+      properties:
+        status:
+          type: integer
+          example: 422
+        message:
+          type: string
+        errors:
+          type: array
+          items:
+            type: string

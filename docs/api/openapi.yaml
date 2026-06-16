@@ -14,16 +14,22 @@ servers:
 tags:
   - name: Auth
     description: Authentication & refresh-token endpoints
+  - name: Payment
+    description: SePay payment gateway integration (checkout form + IPN webhook)
 
 paths:
   /api/auth/login:
-    $ref: "./endpoints/Auth/login.yaml"
+    $ref: "./endpoints/auth/login.yaml"
   /api/auth/register:
-    $ref: "./endpoints/Auth/register.yaml"
+    $ref: "./endpoints/auth/register.yaml"
   /api/auth/refresh-token:
-    $ref: "./endpoints/Auth/refresh-token.yaml"
+    $ref: "./endpoints/auth/refresh-token.yaml"
   /api/auth/logout:
-    $ref: "./endpoints/Auth/logout.yaml"
+    $ref: "./endpoints/auth/logout.yaml"
+  /api/payment/create:
+    $ref: "./endpoints/payment/create.yaml"
+  /api/payment/ipn:
+    $ref: "./endpoints/payment/ipn.yaml"
 
 components:
   securitySchemes:

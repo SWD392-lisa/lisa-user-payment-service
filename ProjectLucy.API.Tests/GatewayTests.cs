@@ -20,7 +20,7 @@ namespace ProjectLucy.API.Tests
 {
     public class MockHttpMessageHandler : HttpMessageHandler
     {
-        public HttpRequestMessage LastRequest { get; set; }
+        public HttpRequestMessage? LastRequest { get; set; }
 
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
