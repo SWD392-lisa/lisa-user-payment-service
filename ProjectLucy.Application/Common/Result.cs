@@ -9,10 +9,14 @@ namespace ProjectLucy.Application.Common;
 /// </summary>
 public class Result<T>
 {
+    [JsonPropertyName("status")]
     public int Status { get; private set; }
+    [JsonPropertyName("message")]
     public string Message { get; private set; } = null!;
+    [JsonPropertyName("data")]
     public T? Data { get; private set; }
 
+    [JsonPropertyName("errors")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public List<string>? Errors { get; private set; }
 
