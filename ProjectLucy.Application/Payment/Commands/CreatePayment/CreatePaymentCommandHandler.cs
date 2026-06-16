@@ -47,7 +47,7 @@ public class CreatePaymentCommandHandler : IRequestHandler<CreatePaymentCommand,
             Amount = cmd.Request.OrderAmount,
             Currency = "VND",
             TransactionContent = cmd.Request.OrderDescription,
-            Status = "PENDING",
+            Status = "pending",
             ReferenceCode = cmd.Request.OrderInvoiceNumber,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow

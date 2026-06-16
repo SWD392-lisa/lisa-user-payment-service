@@ -12,7 +12,7 @@ public class HandleIpnCommandHandler : IRequestHandler<HandleIpnCommand, Result<
     private readonly ITransactionRepository _transactionRepo;
     private readonly IUnitOfWork _unitOfWork;
 
-    private static readonly string[] TerminalStatuses = ["SUCCESS", "FAILED", "CANCELLED"];
+    private static readonly string[] TerminalStatuses = ["success", "failed", "cancelled"];
 
     public HandleIpnCommandHandler(
         ISePayService sePayService,
@@ -47,16 +47,16 @@ public class HandleIpnCommandHandler : IRequestHandler<HandleIpnCommand, Result<
             throw new NotFoundException($"Transaction with invoice '{ipn.OrderInvoiceNumber}' was not found");
 
         // 3. Idempotency: a transaction already in a terminal state is not reprocessed
-        var currentStatus = (transaction.Status ?? string.Empty).ToUpperInvariant();
+        var currentStatus = (transaction.Status ?? string.Empty).ToLowerInvariant();
         if (TerminalStatuses.Contains(currentStatus))
             return Result<object>.Success(new { received = true }, "IPN already processed (idempotent)");
 
         // 4. Map SePay status → internal status
-        transaction.Status = ipn.TransactionStatus?.ToUpperInvariant() switch
+        transaction.Status = ipn.TransactionStatus?.ToLowerInvariant() switch
         {
-            "SUCCESS"   => "SUCCESS",
-            "FAILED"    => "FAILED",
-            "CANCELLED" => "CANCELLED",
+            "success"   => "success",
+            "failed"    => "failed",
+            "cancelled" => "cancelled",
             _           => transaction.Status
         };
         transaction.UpdatedAt = DateTime.UtcNow;
