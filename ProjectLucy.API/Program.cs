@@ -149,11 +149,17 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
     {
+        // Đọc allowed origins từ biến môi trường, mặc định là localhost
+        var allowedOrigins = builder.Configuration["ALLOWED_ORIGINS"]?.Split(',', StringSplitOptions.RemoveEmptyEntries) ?? new[]
+        {
+            "http://localhost:3000",
+            "http://localhost:5173",
+            "http://localhost:4200",
+            "https://lisa-frontend-app.vercel.app"
+        };
+        
         policy
-            .WithOrigins(
-                "http://localhost:3000",
-                "http://localhost:5173",
-                "http://localhost:4200")
+            .WithOrigins(allowedOrigins)
             .AllowAnyHeader()
             .AllowAnyMethod()
             .AllowCredentials();
