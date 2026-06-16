@@ -149,10 +149,10 @@ namespace ProjectLucy.API.Controllers
             var cookieOptions = new CookieOptions
             {
                 HttpOnly = true,
-                Secure = true,
-                SameSite = SameSiteMode.Strict,
+                Secure = false, // Allow non-HTTPS for development
+                SameSite = SameSiteMode.Lax, // Relax SameSite for development
                 Expires = DateTimeOffset.UtcNow.AddDays(7),
-                Path = "/api/auth"
+                Path = "/"
             };
 
             Response.Cookies.Append(RefreshTokenCookieName, refreshToken, cookieOptions);
