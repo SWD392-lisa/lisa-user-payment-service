@@ -46,9 +46,9 @@ public class SePayService : ISePayService
             ["operation"] = "PURCHASE",
             ["order_description"] = request.OrderDescription,
             ["order_invoice_number"] = request.OrderInvoiceNumber,
-            ["success_url"] = _options.SuccessUrl,
-            ["error_url"] = _options.ErrorUrl,
-            ["cancel_url"] = _options.CancelUrl,
+            ["success_url"] = $"{_options.SuccessUrl}?orderInvoiceNumber={request.OrderInvoiceNumber}",
+            ["error_url"] = $"{_options.ErrorUrl}?orderInvoiceNumber={request.OrderInvoiceNumber}",
+            ["cancel_url"] = $"{_options.CancelUrl}?orderInvoiceNumber={request.OrderInvoiceNumber}",
         };
 
         if (!string.IsNullOrWhiteSpace(request.CustomerId))
