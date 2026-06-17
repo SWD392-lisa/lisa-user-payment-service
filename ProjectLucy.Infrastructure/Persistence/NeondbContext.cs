@@ -225,6 +225,8 @@ public partial class NeonDbContext : DbContext
 
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("now()");
 
+            entity.Property(e => e.EntryType).HasColumnType("wallet_entry_type");
+
             entity.HasOne(d => d.Transaction).WithMany(p => p.WalletLedgers)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("fk_ledger_transaction");
