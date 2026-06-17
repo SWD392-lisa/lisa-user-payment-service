@@ -76,7 +76,6 @@ public class ConfirmPaymentCommandHandler : IRequestHandler<ConfirmPaymentComman
 
             wallet.WalletLedgers.Add(new WalletLedger
             {
-                WalletId = wallet.Id,
                 TransactionId = transaction.Id,
                 Amount = transaction.Amount,
                 BalanceAfter = wallet.Balance,
