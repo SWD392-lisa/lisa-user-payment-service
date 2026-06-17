@@ -33,7 +33,6 @@ public partial class WalletLedger
     public decimal BalanceAfter { get; set; }
 
     [Column("entry_type")]
-    [StringLength(10)]
     public string EntryType { get; set; } = null!;
 
     [Column("note")]

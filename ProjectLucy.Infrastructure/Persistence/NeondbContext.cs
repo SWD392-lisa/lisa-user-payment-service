@@ -46,8 +46,6 @@ public partial class NeonDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.HasPostgresEnum("wallet_entry_type", new[] { "CREDIT", "DEBIT" });
-
         modelBuilder.Entity<GiftCatalog>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("gift_catalog_pkey");
@@ -224,8 +222,6 @@ public partial class NeonDbContext : DbContext
             entity.ToTable("wallet_ledger", tb => tb.HasComment("Sổ cái bất biến. Không UPDATE/DELETE — chỉ INSERT. Dùng để audit, đối soát, và tái tính balance nếu cần."));
 
             entity.Property(e => e.CreatedAt).HasDefaultValueSql("now()");
-
-            entity.Property(e => e.EntryType).HasColumnType("wallet_entry_type");
 
             entity.HasOne(d => d.Transaction).WithMany(p => p.WalletLedgers)
                 .OnDelete(DeleteBehavior.ClientSetNull)
