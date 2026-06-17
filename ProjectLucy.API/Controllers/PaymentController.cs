@@ -3,6 +3,7 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using ProjectLucy.Application.Payment.Commands.CreatePayment;
+using ProjectLucy.Application.Payment.Commands.ConfirmPayment;
 using ProjectLucy.Application.Payment.Commands.HandleIpn;
 using ProjectLucy.Application.Payment.Queries.GetPaymentHistory;
 using ProjectLucy.Shared.Dtos.PaymentDtos;
@@ -56,6 +57,29 @@ public class PaymentController : ControllerBase
             return BadRequest(ModelState);
 
         var result = await _sender.Send(new HandleIpnCommand(request));
+        return StatusCode(result.Status, result);
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // POST /api/payment/confirm
+    // ─────────────────────────────────────────────────────────────
+    /// <summary>
+    /// Called by the frontend after SePay redirects the user back.
+    /// Updates the transaction status and credits the wallet.
+    /// This is a fallback for when the IPN webhook is not available
+    /// (e.g. sandbox mode or backend not publicly accessible).
+    /// </summary>
+    [HttpPost("confirm")]
+    [Authorize]
+    public async Task<IActionResult> Confirm([FromBody] ConfirmPaymentRequest request)
+    {
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
+
+        if (!TryGetUserId(out var userId))
+            return Unauthorized(new { Status = 401, Message = "Invalid or missing user identity" });
+
+        var result = await _sender.Send(new ConfirmPaymentCommand(request, userId));
         return StatusCode(result.Status, result);
     }
 

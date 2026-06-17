@@ -16,6 +16,7 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, Result<Re
 {
     private readonly IUserRepository _userRepo;
     private readonly IRoleRepository _roleRepo;
+    private readonly IWalletRepository _walletRepo;
     private readonly IUnitOfWork _unitOfWork;
 
     private const string DefaultRoleCode = "LUCY";
@@ -23,10 +24,12 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, Result<Re
     public RegisterCommandHandler(
         IUserRepository userRepo,
         IRoleRepository roleRepo,
+        IWalletRepository walletRepo,
         IUnitOfWork unitOfWork)
     {
         _userRepo = userRepo;
         _roleRepo = roleRepo;
+        _walletRepo = walletRepo;
         _unitOfWork = unitOfWork;
     }
 
@@ -61,6 +64,18 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, Result<Re
         };
 
         await _userRepo.AddAsync(newUser, ct);
+        await _unitOfWork.SaveChangesAsync(ct);
+
+        // 6. Create a wallet for the new user with zero balance
+        var wallet = new Wallet
+        {
+            UserId = newUser.UserId,
+            Balance = 0,
+            Currency = "VND",
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
+        };
+        await _walletRepo.AddAsync(wallet, ct);
         await _unitOfWork.SaveChangesAsync(ct);
 
         return Result<RegisterResponse>.Created(
