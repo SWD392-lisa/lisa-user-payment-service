@@ -93,6 +93,7 @@ public class HandleIpnCommandHandler : IRequestHandler<HandleIpnCommand, Result<
                 TransactionId = transaction.Id,
                 Amount = transaction.Amount,
                 BalanceAfter = wallet.Balance,
+                EntryType = "CREDIT",
                 Note = $"SePay deposit: {transaction.ReferenceCode}",
                 CreatedAt = DateTime.UtcNow
             });
