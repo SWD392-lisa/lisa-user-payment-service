@@ -1,6 +1,7 @@
 using MediatR;
 using ProjectLucy.Application.Common;
 using ProjectLucy.Application.Interfaces;
+using ProjectLucy.Domain.Entities;
 using ProjectLucy.Domain.Interfaces;
 using WalletEntity = ProjectLucy.Domain.Entities.Wallet;
 
@@ -73,7 +74,7 @@ public class ConfirmPaymentCommandHandler : IRequestHandler<ConfirmPaymentComman
             wallet.Balance += transaction.Amount;
             wallet.UpdatedAt = DateTime.UtcNow;
 
-            wallet.WalletLedgers.Add(new Domain.Entities.WalletLedger
+            wallet.WalletLedgers.Add(new WalletLedger
             {
                 WalletId = wallet.Id,
                 TransactionId = transaction.Id,

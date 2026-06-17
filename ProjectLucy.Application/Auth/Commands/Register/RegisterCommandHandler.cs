@@ -5,6 +5,7 @@ using ProjectLucy.Application.Common.Exceptions;
 using ProjectLucy.Application.Interfaces;
 using ProjectLucy.Domain.Entities;
 using ProjectLucy.Domain.Interfaces;
+using WalletEntity = ProjectLucy.Domain.Entities.Wallet;
 
 namespace ProjectLucy.Application.Auth.Commands.Register;
 
@@ -67,7 +68,7 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, Result<Re
         await _unitOfWork.SaveChangesAsync(ct);
 
         // 6. Create a wallet for the new user with zero balance
-        var wallet = new Wallet
+        var wallet = new WalletEntity
         {
             UserId = newUser.UserId,
             Balance = 0,
