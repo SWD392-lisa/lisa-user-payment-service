@@ -15,7 +15,7 @@ public class HandleIpnCommandHandler : IRequestHandler<HandleIpnCommand, Result<
     private readonly IWalletRepository _walletRepo;
     private readonly IUnitOfWork _unitOfWork;
 
-    private static readonly string[] TerminalStatuses = ["success", "failed", "cancelled"];
+    private static readonly string[] TerminalStatuses = ["completed", "failed", "cancelled"];
 
     public HandleIpnCommandHandler(
         ISePayService sePayService,
@@ -56,10 +56,10 @@ public class HandleIpnCommandHandler : IRequestHandler<HandleIpnCommand, Result<
         if (TerminalStatuses.Contains(currentStatus))
             return Result<object>.Success(new { received = true }, "IPN already processed (idempotent)");
 
-        // 4. Map SePay status → internal status
+        // 4. Map SePay status → internal status (DB constraint: pending, completed, failed, cancelled)
         var newStatus = ipn.TransactionStatus?.ToLowerInvariant() switch
         {
-            "success"   => "success",
+            "success"   => "completed",
             "failed"    => "failed",
             "cancelled" => "cancelled",
             _           => transaction.Status
@@ -68,7 +68,7 @@ public class HandleIpnCommandHandler : IRequestHandler<HandleIpnCommand, Result<
         transaction.UpdatedAt = DateTime.UtcNow;
 
         // 5. Credit wallet on successful payment
-        if (newStatus == "success" && transaction.Amount > 0)
+        if (newStatus == "completed" && transaction.Amount > 0)
         {
             var wallet = await _walletRepo.GetByUserIdAsync(transaction.UserId, ct);
             if (wallet is null)
@@ -89,6 +89,7 @@ public class HandleIpnCommandHandler : IRequestHandler<HandleIpnCommand, Result<
 
             wallet.WalletLedgers.Add(new WalletLedger
             {
+                WalletId = wallet.Id,
                 TransactionId = transaction.Id,
                 Amount = transaction.Amount,
                 BalanceAfter = wallet.Balance,

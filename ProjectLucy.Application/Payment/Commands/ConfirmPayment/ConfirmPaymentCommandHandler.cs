@@ -13,7 +13,7 @@ public class ConfirmPaymentCommandHandler : IRequestHandler<ConfirmPaymentComman
     private readonly IWalletRepository _walletRepo;
     private readonly IUnitOfWork _unitOfWork;
 
-    private static readonly string[] TerminalStatuses = ["success", "failed", "cancelled"];
+    private static readonly string[] TerminalStatuses = ["completed", "failed", "cancelled"];
 
     public ConfirmPaymentCommandHandler(
         ITransactionRepository transactionRepo,
@@ -43,10 +43,10 @@ public class ConfirmPaymentCommandHandler : IRequestHandler<ConfirmPaymentComman
         if (TerminalStatuses.Contains(currentStatus))
             return Result<object>.Success(new { received = true }, "Payment already processed (idempotent)");
 
-        // 4. Map status
+        // 4. Map status — DB constraint only allows: pending, completed, failed, cancelled
         var newStatus = req.Status.ToLowerInvariant() switch
         {
-            "success" => "success",
+            "success" => "completed",
             "failed" => "failed",
             "cancelled" => "cancelled",
             _ => transaction.Status
@@ -55,7 +55,7 @@ public class ConfirmPaymentCommandHandler : IRequestHandler<ConfirmPaymentComman
         transaction.UpdatedAt = DateTime.UtcNow;
 
         // 5. Credit wallet on successful payment
-        if (newStatus == "success" && transaction.Amount > 0)
+        if (newStatus == "completed" && transaction.Amount > 0)
         {
             var wallet = await _walletRepo.GetByUserIdAsync(transaction.UserId, ct);
             if (wallet is null)
@@ -76,6 +76,7 @@ public class ConfirmPaymentCommandHandler : IRequestHandler<ConfirmPaymentComman
 
             wallet.WalletLedgers.Add(new WalletLedger
             {
+                WalletId = wallet.Id,
                 TransactionId = transaction.Id,
                 Amount = transaction.Amount,
                 BalanceAfter = wallet.Balance,
