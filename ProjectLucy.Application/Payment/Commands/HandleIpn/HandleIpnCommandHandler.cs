@@ -2,7 +2,9 @@ using MediatR;
 using ProjectLucy.Application.Common;
 using ProjectLucy.Application.Common.Exceptions;
 using ProjectLucy.Application.Interfaces;
+using ProjectLucy.Domain.Entities;
 using ProjectLucy.Domain.Interfaces;
+using WalletEntity = ProjectLucy.Domain.Entities.Wallet;
 
 namespace ProjectLucy.Application.Payment.Commands.HandleIpn;
 
@@ -10,6 +12,7 @@ public class HandleIpnCommandHandler : IRequestHandler<HandleIpnCommand, Result<
 {
     private readonly ISePayService _sePayService;
     private readonly ITransactionRepository _transactionRepo;
+    private readonly IWalletRepository _walletRepo;
     private readonly IUnitOfWork _unitOfWork;
 
     private static readonly string[] TerminalStatuses = ["success", "failed", "cancelled"];
@@ -17,10 +20,12 @@ public class HandleIpnCommandHandler : IRequestHandler<HandleIpnCommand, Result<
     public HandleIpnCommandHandler(
         ISePayService sePayService,
         ITransactionRepository transactionRepo,
+        IWalletRepository walletRepo,
         IUnitOfWork unitOfWork)
     {
         _sePayService = sePayService;
         _transactionRepo = transactionRepo;
+        _walletRepo = walletRepo;
         _unitOfWork = unitOfWork;
     }
 
@@ -52,14 +57,46 @@ public class HandleIpnCommandHandler : IRequestHandler<HandleIpnCommand, Result<
             return Result<object>.Success(new { received = true }, "IPN already processed (idempotent)");
 
         // 4. Map SePay status → internal status
-        transaction.Status = ipn.TransactionStatus?.ToLowerInvariant() switch
+        var newStatus = ipn.TransactionStatus?.ToLowerInvariant() switch
         {
             "success"   => "success",
             "failed"    => "failed",
             "cancelled" => "cancelled",
             _           => transaction.Status
         };
+        transaction.Status = newStatus;
         transaction.UpdatedAt = DateTime.UtcNow;
+
+        // 5. Credit wallet on successful payment
+        if (newStatus == "success" && transaction.Amount > 0)
+        {
+            var wallet = await _walletRepo.GetByUserIdAsync(transaction.UserId, ct);
+            if (wallet is null)
+            {
+                wallet = new WalletEntity
+                {
+                    UserId = transaction.UserId,
+                    Balance = 0,
+                    Currency = "VND",
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
+                };
+                await _walletRepo.AddAsync(wallet, ct);
+            }
+
+            wallet.Balance += transaction.Amount;
+            wallet.UpdatedAt = DateTime.UtcNow;
+
+            wallet.WalletLedgers.Add(new WalletLedger
+            {
+                WalletId = wallet.Id,
+                TransactionId = transaction.Id,
+                Amount = transaction.Amount,
+                BalanceAfter = wallet.Balance,
+                Note = $"SePay deposit: {transaction.ReferenceCode}",
+                CreatedAt = DateTime.UtcNow
+            });
+        }
 
         await _unitOfWork.SaveChangesAsync(ct);
 
