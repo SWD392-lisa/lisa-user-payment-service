@@ -22,202 +22,6 @@ namespace ProjectLucy.Infrastructure.Persistence.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("ProjectLucy.Domain.Entities.GiftCatalog", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasColumnName("id")
-                        .HasDefaultValueSql("gen_random_uuid()");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at")
-                        .HasDefaultValueSql("now()");
-
-                    b.Property<string>("Currency")
-                        .IsRequired()
-                        .ValueGeneratedOnAdd()
-                        .HasMaxLength(10)
-                        .HasColumnType("character varying(10)")
-                        .HasColumnName("currency")
-                        .HasDefaultValueSql("'VND'::character varying");
-
-                    b.Property<string>("Description")
-                        .HasColumnType("text")
-                        .HasColumnName("description");
-
-                    b.Property<string>("IconUrl")
-                        .HasColumnType("text")
-                        .HasColumnName("icon_url");
-
-                    b.Property<bool>("IsActive")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("boolean")
-                        .HasDefaultValue(true)
-                        .HasColumnName("is_active");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)")
-                        .HasColumnName("name");
-
-                    b.Property<decimal>("Price")
-                        .HasPrecision(10, 2)
-                        .HasColumnType("numeric(10,2)")
-                        .HasColumnName("price");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("updated_at")
-                        .HasDefaultValueSql("now()");
-
-                    b.HasKey("Id")
-                        .HasName("gift_catalog_pkey");
-
-                    b.HasIndex(new[] { "IsActive" }, "idx_gift_catalog_active");
-
-                    b.ToTable("gift_catalog", null, t =>
-                        {
-                            t.HasComment("Danh mục quà ảo có thể tặng trong phòng học. is_active = FALSE để ẩn khỏi UI mà không xóa lịch sử.");
-                        });
-                });
-
-            modelBuilder.Entity("ProjectLucy.Domain.Entities.GiftTransaction", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasColumnName("id")
-                        .HasDefaultValueSql("gen_random_uuid()");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at")
-                        .HasDefaultValueSql("now()");
-
-                    b.Property<Guid>("GiftId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("gift_id");
-
-                    b.Property<int>("Quantity")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasDefaultValue(1)
-                        .HasColumnName("quantity");
-
-                    b.Property<Guid>("ReceiverId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("receiver_id");
-
-                    b.Property<Guid?>("RoomSessionId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("room_session_id");
-
-                    b.Property<Guid>("SenderId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("sender_id");
-
-                    b.Property<decimal>("TotalValue")
-                        .HasPrecision(10, 2)
-                        .HasColumnType("numeric(10,2)")
-                        .HasColumnName("total_value");
-
-                    b.Property<long>("TransactionId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("transaction_id");
-
-                    b.HasKey("Id")
-                        .HasName("gift_transaction_pkey");
-
-                    b.HasIndex("GiftId");
-
-                    b.HasIndex(new[] { "TransactionId" }, "gift_transaction_transaction_id_key")
-                        .IsUnique();
-
-                    b.HasIndex(new[] { "ReceiverId", "CreatedAt" }, "idx_gift_txn_receiver")
-                        .IsDescending(false, true);
-
-                    b.HasIndex(new[] { "SenderId", "CreatedAt" }, "idx_gift_txn_sender")
-                        .IsDescending(false, true);
-
-                    b.HasIndex(new[] { "RoomSessionId" }, "idx_gift_txn_session");
-
-                    b.ToTable("gift_transaction", null, t =>
-                        {
-                            t.HasComment("Chi tiết tặng quà. transaction_id trỏ đến bản ghi DEBIT trong transactions. Luồng: sender ví DEBIT → wallet_ledger → gift_transaction. Receiver nhận CREDIT riêng qua transaction mới.");
-                        });
-                });
-
-            modelBuilder.Entity("ProjectLucy.Domain.Entities.PaymentMethod", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at")
-                        .HasDefaultValueSql("now()");
-
-                    b.Property<string>("Metadata")
-                        .HasColumnType("jsonb")
-                        .HasColumnName("metadata");
-
-                    b.Property<DateTime?>("PaidAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("paid_at");
-
-                    b.Property<string>("Provider")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)")
-                        .HasColumnName("provider");
-
-                    b.Property<string>("ProviderTxnId")
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)")
-                        .HasColumnName("provider_txn_id");
-
-                    b.Property<string>("RawStatus")
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)")
-                        .HasColumnName("raw_status");
-
-                    b.Property<long>("TransactionId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("transaction_id");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("updated_at")
-                        .HasDefaultValueSql("now()");
-
-                    b.HasKey("Id")
-                        .HasName("payment_method_pkey");
-
-                    b.HasIndex(new[] { "Provider" }, "idx_payment_method_provider");
-
-                    b.HasIndex(new[] { "ProviderTxnId" }, "idx_payment_method_provider_txn");
-
-                    b.HasIndex(new[] { "TransactionId" }, "payment_method_transaction_id_key")
-                        .IsUnique();
-
-                    b.ToTable("payment_method", null, t =>
-                        {
-                            t.HasComment("Lưu chi tiết từ cổng thanh toán (VNPAY/Momo/ZaloPay...). metadata giữ nguyên payload gốc để debug & đối soát.");
-                        });
-                });
-
             modelBuilder.Entity("ProjectLucy.Domain.Entities.RefreshToken", b =>
                 {
                     b.Property<Guid>("TokenId")
@@ -261,7 +65,7 @@ namespace ProjectLucy.Infrastructure.Persistence.Migrations
                     b.HasIndex(new[] { "Token" }, "refresh_token_token_key")
                         .IsUnique();
 
-                    b.ToTable("refresh_token");
+                    b.ToTable("refresh_token", (string)null);
                 });
 
             modelBuilder.Entity("ProjectLucy.Domain.Entities.Role", b =>
@@ -301,7 +105,7 @@ namespace ProjectLucy.Infrastructure.Persistence.Migrations
                     b.HasIndex(new[] { "RoleCode" }, "role_role_code_key")
                         .IsUnique();
 
-                    b.ToTable("role");
+                    b.ToTable("role", (string)null);
                 });
 
             modelBuilder.Entity("ProjectLucy.Domain.Entities.RolePrice", b =>
@@ -362,82 +166,9 @@ namespace ProjectLucy.Infrastructure.Persistence.Migrations
 
                     b.HasIndex(new[] { "RoleId" }, "idx_role_price_role_id");
 
-                    b.ToTable("role_price");
-                });
-
-            modelBuilder.Entity("ProjectLucy.Domain.Entities.RoleUpgradeOrder", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasColumnName("id")
-                        .HasDefaultValueSql("gen_random_uuid()");
-
-                    b.Property<DateTime?>("ActivatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("activated_at");
-
-                    b.Property<DateTime?>("CancelledAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("cancelled_at");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at")
-                        .HasDefaultValueSql("now()");
-
-                    b.Property<DateTime?>("ExpiresAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("expires_at");
-
-                    b.Property<int>("FromRoleId")
-                        .HasColumnType("integer")
-                        .HasColumnName("from_role_id");
-
-                    b.Property<int>("RolePriceId")
-                        .HasColumnType("integer")
-                        .HasColumnName("role_price_id");
-
-                    b.Property<int>("ToRoleId")
-                        .HasColumnType("integer")
-                        .HasColumnName("to_role_id");
-
-                    b.Property<long>("TransactionId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("transaction_id");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("updated_at")
-                        .HasDefaultValueSql("now()");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("user_id");
-
-                    b.HasKey("Id")
-                        .HasName("role_upgrade_order_pkey");
-
-                    b.HasIndex("FromRoleId");
-
-                    b.HasIndex("RolePriceId");
-
-                    b.HasIndex("ToRoleId");
-
-                    b.HasIndex(new[] { "UserId", "ExpiresAt" }, "idx_upgrade_active")
-                        .HasFilter("((activated_at IS NOT NULL) AND (cancelled_at IS NULL))");
-
-                    b.HasIndex(new[] { "UserId", "CreatedAt" }, "idx_upgrade_user")
-                        .IsDescending(false, true);
-
-                    b.HasIndex(new[] { "TransactionId" }, "role_upgrade_order_transaction_id_key")
-                        .IsUnique();
-
-                    b.ToTable("role_upgrade_order", null, t =>
+                    b.ToTable("role_price", null, t =>
                         {
-                            t.HasComment("Đơn hàng nâng cấp tài khoản (Pro/Super). activated_at được set khi transaction → completed. expires_at = activated_at + role_price.duration (NULL = không hết hạn).");
+                            t.ExcludeFromMigrations();
                         });
                 });
 
@@ -514,7 +245,10 @@ namespace ProjectLucy.Infrastructure.Persistence.Migrations
                     b.HasIndex(new[] { "ReferenceCode" }, "transactions_reference_code_key")
                         .IsUnique();
 
-                    b.ToTable("transactions");
+                    b.ToTable("transactions", null, t =>
+                        {
+                            t.ExcludeFromMigrations();
+                        });
                 });
 
             modelBuilder.Entity("ProjectLucy.Domain.Entities.TransactionType", b =>
@@ -568,7 +302,10 @@ namespace ProjectLucy.Infrastructure.Persistence.Migrations
                     b.HasIndex(new[] { "Code" }, "transaction_type_code_key")
                         .IsUnique();
 
-                    b.ToTable("transaction_type");
+                    b.ToTable("transaction_type", null, t =>
+                        {
+                            t.ExcludeFromMigrations();
+                        });
                 });
 
             modelBuilder.Entity("ProjectLucy.Domain.Entities.User", b =>
@@ -633,161 +370,7 @@ namespace ProjectLucy.Infrastructure.Persistence.Migrations
                     b.HasIndex(new[] { "UserPhoneNumber" }, "user_user_phone_number_key")
                         .IsUnique();
 
-                    b.ToTable("user");
-                });
-
-            modelBuilder.Entity("ProjectLucy.Domain.Entities.Wallet", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasColumnName("id")
-                        .HasDefaultValueSql("gen_random_uuid()");
-
-                    b.Property<decimal>("Balance")
-                        .ValueGeneratedOnAdd()
-                        .HasPrecision(15, 2)
-                        .HasColumnType("numeric(15,2)")
-                        .HasColumnName("balance")
-                        .HasDefaultValueSql("0.00");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at")
-                        .HasDefaultValueSql("now()");
-
-                    b.Property<string>("Currency")
-                        .IsRequired()
-                        .ValueGeneratedOnAdd()
-                        .HasMaxLength(10)
-                        .HasColumnType("character varying(10)")
-                        .HasColumnName("currency")
-                        .HasDefaultValueSql("'VND'::character varying");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("updated_at")
-                        .HasDefaultValueSql("now()");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("user_id");
-
-                    b.HasKey("Id")
-                        .HasName("wallet_pkey");
-
-                    b.HasIndex(new[] { "UserId" }, "wallet_user_id_key")
-                        .IsUnique();
-
-                    b.ToTable("wallet", null, t =>
-                        {
-                            t.HasComment("Ví điện tử 1-1 với user. Balance luôn >= 0, mọi thay đổi phải qua wallet_ledger.");
-                        });
-                });
-
-            modelBuilder.Entity("ProjectLucy.Domain.Entities.WalletLedger", b =>
-                {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
-
-                    b.Property<decimal>("Amount")
-                        .HasPrecision(15, 2)
-                        .HasColumnType("numeric(15,2)")
-                        .HasColumnName("amount");
-
-                    b.Property<decimal>("BalanceAfter")
-                        .HasPrecision(15, 2)
-                        .HasColumnType("numeric(15,2)")
-                        .HasColumnName("balance_after");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("created_at")
-                        .HasDefaultValueSql("now()");
-
-                    b.Property<string>("EntryType")
-                        .IsRequired()
-                        .HasColumnType("text")
-                        .HasColumnName("entry_type");
-
-                    b.Property<string>("Note")
-                        .HasColumnType("text")
-                        .HasColumnName("note");
-
-                    b.Property<long>("TransactionId")
-                        .HasColumnType("bigint")
-                        .HasColumnName("transaction_id");
-
-                    b.Property<Guid>("WalletId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("wallet_id");
-
-                    b.HasKey("Id")
-                        .HasName("wallet_ledger_pkey");
-
-                    b.HasIndex(new[] { "TransactionId" }, "idx_wallet_ledger_txn");
-
-                    b.HasIndex(new[] { "WalletId", "CreatedAt" }, "idx_wallet_ledger_wallet")
-                        .IsDescending(false, true);
-
-                    b.ToTable("wallet_ledger", null, t =>
-                        {
-                            t.HasComment("Sổ cái bất biến. Không UPDATE/DELETE — chỉ INSERT. Dùng để audit, đối soát, và tái tính balance nếu cần.");
-                        });
-                });
-
-            modelBuilder.Entity("ProjectLucy.Domain.Entities.GiftTransaction", b =>
-                {
-                    b.HasOne("ProjectLucy.Domain.Entities.GiftCatalog", "Gift")
-                        .WithMany("GiftTransactions")
-                        .HasForeignKey("GiftId")
-                        .IsRequired()
-                        .HasConstraintName("fk_gift_txn_gift");
-
-                    b.HasOne("ProjectLucy.Domain.Entities.User", "Receiver")
-                        .WithMany("GiftTransactionReceivers")
-                        .HasForeignKey("ReceiverId")
-                        .IsRequired()
-                        .HasConstraintName("fk_gift_txn_receiver");
-
-                    b.HasOne("ProjectLucy.Domain.Entities.User", "Sender")
-                        .WithMany("GiftTransactionSenders")
-                        .HasForeignKey("SenderId")
-                        .IsRequired()
-                        .HasConstraintName("fk_gift_txn_sender");
-
-                    b.HasOne("ProjectLucy.Domain.Entities.Transaction", "Transaction")
-                        .WithOne("GiftTransaction")
-                        .HasForeignKey("ProjectLucy.Domain.Entities.GiftTransaction", "TransactionId")
-                        .IsRequired()
-                        .HasConstraintName("fk_gift_txn_transaction");
-
-                    b.Navigation("Gift");
-
-                    b.Navigation("Receiver");
-
-                    b.Navigation("Sender");
-
-                    b.Navigation("Transaction");
-                });
-
-            modelBuilder.Entity("ProjectLucy.Domain.Entities.PaymentMethod", b =>
-                {
-                    b.HasOne("ProjectLucy.Domain.Entities.Transaction", "Transaction")
-                        .WithOne("PaymentMethod")
-                        .HasForeignKey("ProjectLucy.Domain.Entities.PaymentMethod", "TransactionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_payment_method_transaction");
-
-                    b.Navigation("Transaction");
+                    b.ToTable("user", (string)null);
                 });
 
             modelBuilder.Entity("ProjectLucy.Domain.Entities.RefreshToken", b =>
@@ -814,49 +397,6 @@ namespace ProjectLucy.Infrastructure.Persistence.Migrations
                     b.Navigation("Role");
                 });
 
-            modelBuilder.Entity("ProjectLucy.Domain.Entities.RoleUpgradeOrder", b =>
-                {
-                    b.HasOne("ProjectLucy.Domain.Entities.Role", "FromRole")
-                        .WithMany("RoleUpgradeOrderFromRoles")
-                        .HasForeignKey("FromRoleId")
-                        .IsRequired()
-                        .HasConstraintName("fk_upgrade_from_role");
-
-                    b.HasOne("ProjectLucy.Domain.Entities.RolePrice", "RolePrice")
-                        .WithMany("RoleUpgradeOrders")
-                        .HasForeignKey("RolePriceId")
-                        .IsRequired()
-                        .HasConstraintName("fk_upgrade_role_price");
-
-                    b.HasOne("ProjectLucy.Domain.Entities.Role", "ToRole")
-                        .WithMany("RoleUpgradeOrderToRoles")
-                        .HasForeignKey("ToRoleId")
-                        .IsRequired()
-                        .HasConstraintName("fk_upgrade_to_role");
-
-                    b.HasOne("ProjectLucy.Domain.Entities.Transaction", "Transaction")
-                        .WithOne("RoleUpgradeOrder")
-                        .HasForeignKey("ProjectLucy.Domain.Entities.RoleUpgradeOrder", "TransactionId")
-                        .IsRequired()
-                        .HasConstraintName("fk_upgrade_transaction");
-
-                    b.HasOne("ProjectLucy.Domain.Entities.User", "User")
-                        .WithMany("RoleUpgradeOrders")
-                        .HasForeignKey("UserId")
-                        .IsRequired()
-                        .HasConstraintName("fk_upgrade_user");
-
-                    b.Navigation("FromRole");
-
-                    b.Navigation("RolePrice");
-
-                    b.Navigation("ToRole");
-
-                    b.Navigation("Transaction");
-
-                    b.Navigation("User");
-                });
-
             modelBuilder.Entity("ProjectLucy.Domain.Entities.Transaction", b =>
                 {
                     b.HasOne("ProjectLucy.Domain.Entities.TransactionType", "TransactionType")
@@ -868,6 +408,7 @@ namespace ProjectLucy.Infrastructure.Persistence.Migrations
                     b.HasOne("ProjectLucy.Domain.Entities.User", "User")
                         .WithMany("Transactions")
                         .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired()
                         .HasConstraintName("fk_transactions_user");
 
@@ -888,67 +429,11 @@ namespace ProjectLucy.Infrastructure.Persistence.Migrations
                     b.Navigation("Role");
                 });
 
-            modelBuilder.Entity("ProjectLucy.Domain.Entities.Wallet", b =>
-                {
-                    b.HasOne("ProjectLucy.Domain.Entities.User", "User")
-                        .WithOne("Wallet")
-                        .HasForeignKey("ProjectLucy.Domain.Entities.Wallet", "UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired()
-                        .HasConstraintName("fk_wallet_user");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("ProjectLucy.Domain.Entities.WalletLedger", b =>
-                {
-                    b.HasOne("ProjectLucy.Domain.Entities.Transaction", "Transaction")
-                        .WithMany("WalletLedgers")
-                        .HasForeignKey("TransactionId")
-                        .IsRequired()
-                        .HasConstraintName("fk_ledger_transaction");
-
-                    b.HasOne("ProjectLucy.Domain.Entities.Wallet", "Wallet")
-                        .WithMany("WalletLedgers")
-                        .HasForeignKey("WalletId")
-                        .IsRequired()
-                        .HasConstraintName("fk_ledger_wallet");
-
-                    b.Navigation("Transaction");
-
-                    b.Navigation("Wallet");
-                });
-
-            modelBuilder.Entity("ProjectLucy.Domain.Entities.GiftCatalog", b =>
-                {
-                    b.Navigation("GiftTransactions");
-                });
-
             modelBuilder.Entity("ProjectLucy.Domain.Entities.Role", b =>
                 {
                     b.Navigation("RolePrices");
 
-                    b.Navigation("RoleUpgradeOrderFromRoles");
-
-                    b.Navigation("RoleUpgradeOrderToRoles");
-
                     b.Navigation("Users");
-                });
-
-            modelBuilder.Entity("ProjectLucy.Domain.Entities.RolePrice", b =>
-                {
-                    b.Navigation("RoleUpgradeOrders");
-                });
-
-            modelBuilder.Entity("ProjectLucy.Domain.Entities.Transaction", b =>
-                {
-                    b.Navigation("GiftTransaction");
-
-                    b.Navigation("PaymentMethod");
-
-                    b.Navigation("RoleUpgradeOrder");
-
-                    b.Navigation("WalletLedgers");
                 });
 
             modelBuilder.Entity("ProjectLucy.Domain.Entities.TransactionType", b =>
@@ -958,22 +443,9 @@ namespace ProjectLucy.Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("ProjectLucy.Domain.Entities.User", b =>
                 {
-                    b.Navigation("GiftTransactionReceivers");
-
-                    b.Navigation("GiftTransactionSenders");
-
                     b.Navigation("RefreshTokens");
 
-                    b.Navigation("RoleUpgradeOrders");
-
                     b.Navigation("Transactions");
-
-                    b.Navigation("Wallet");
-                });
-
-            modelBuilder.Entity("ProjectLucy.Domain.Entities.Wallet", b =>
-                {
-                    b.Navigation("WalletLedgers");
                 });
 #pragma warning restore 612, 618
         }

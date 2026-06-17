@@ -108,7 +108,7 @@ public class ConfirmPaymentCommandHandler : IRequestHandler<ConfirmPaymentComman
                 TransactionId = transaction.Id,
                 Amount = transaction.Amount,
                 BalanceAfter = wallet.Balance,
-                EntryType = "CREDIT",
+                EntryType = "DEPOSIT",
                 Note = $"SePay deposit (frontend confirm): {transaction.ReferenceCode}",
                 CreatedAt = DateTime.UtcNow
             };
