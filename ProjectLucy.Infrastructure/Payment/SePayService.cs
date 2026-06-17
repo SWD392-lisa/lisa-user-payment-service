@@ -36,7 +36,7 @@ public class SePayService : ISePayService
         _options = options.Value;
     }
 
-    public SePayFormData BuildFormData(CreatePaymentRequest request)
+    public SePayFormData BuildFormData(CreatePaymentRequest request, long transactionId)
     {
         var fields = new Dictionary<string, string>
         {
@@ -46,9 +46,9 @@ public class SePayService : ISePayService
             ["operation"] = "PURCHASE",
             ["order_description"] = request.OrderDescription,
             ["order_invoice_number"] = request.OrderInvoiceNumber,
-            ["success_url"] = $"{_options.SuccessUrl}?orderInvoiceNumber={request.OrderInvoiceNumber}&orderAmount={request.OrderAmount}",
-            ["error_url"] = $"{_options.ErrorUrl}?orderInvoiceNumber={request.OrderInvoiceNumber}&orderAmount={request.OrderAmount}",
-            ["cancel_url"] = $"{_options.CancelUrl}?orderInvoiceNumber={request.OrderInvoiceNumber}&orderAmount={request.OrderAmount}",
+            ["success_url"] = $"{_options.SuccessUrl}?orderInvoiceNumber={request.OrderInvoiceNumber}&orderAmount={request.OrderAmount}&transactionId={transactionId}",
+            ["error_url"] = $"{_options.ErrorUrl}?orderInvoiceNumber={request.OrderInvoiceNumber}&orderAmount={request.OrderAmount}&transactionId={transactionId}",
+            ["cancel_url"] = $"{_options.CancelUrl}?orderInvoiceNumber={request.OrderInvoiceNumber}&orderAmount={request.OrderAmount}&transactionId={transactionId}",
         };
 
         if (!string.IsNullOrWhiteSpace(request.CustomerId))

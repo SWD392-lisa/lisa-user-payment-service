@@ -9,7 +9,7 @@ namespace ProjectLucy.Application.Interfaces;
 public interface ISePayService
 {
     /// <summary>Build the form payload that the frontend submits to the gateway.</summary>
-    SePayFormData BuildFormData(CreatePaymentRequest request);
+    SePayFormData BuildFormData(CreatePaymentRequest request, long transactionId);
 
     /// <summary>Compute the HMAC-SHA256 signature over an arbitrary field map.</summary>
     string CreateSignature(IDictionary<string, string> fields);

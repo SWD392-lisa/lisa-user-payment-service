@@ -29,16 +29,13 @@ public class CreatePaymentCommandHandler : IRequestHandler<CreatePaymentCommand,
 
     public async Task<Result<SePayFormData>> Handle(CreatePaymentCommand cmd, CancellationToken ct)
     {
-        // 1. Build signed form data for the frontend
-        var formData = _sePayService.BuildFormData(cmd.Request);
-
-        // 2. Resolve the SePay transaction type (must be seeded in transaction_type)
+        // 1. Resolve the SePay transaction type (must be seeded in transaction_type)
         var typeId = await _transactionRepo.GetTypeIdByCodeAsync(SePayTransactionTypeCode, ct);
         if (typeId is null)
             throw new ServerException(
                 $"Transaction type '{SePayTransactionTypeCode}' not found. Please seed transaction types first.");
 
-        // 3. Persist a PENDING transaction so the IPN handler can resolve it later.
+        // 2. Persist a PENDING transaction so the IPN handler can resolve it later.
         //    reference_code holds the unique gateway invoice number.
         var transaction = new Transaction
         {
@@ -55,6 +52,9 @@ public class CreatePaymentCommandHandler : IRequestHandler<CreatePaymentCommand,
 
         await _transactionRepo.AddAsync(transaction, ct);
         await _unitOfWork.SaveChangesAsync(ct);
+
+        // 3. Build signed form data with the callback URLs including transaction info
+        var formData = _sePayService.BuildFormData(cmd.Request, transaction.Id);
 
         return Result<SePayFormData>.Success(formData, "Payment form data created");
     }
