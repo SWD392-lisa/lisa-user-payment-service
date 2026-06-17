@@ -1,4 +1,4 @@
-namespace ProjectLucy.Shared.Dtos.LogoutDtos
+namespace ProjectLucy.Application.DTOs.LogoutDtos
 {
     /// <summary>
     /// Optional body for logout — server prefers reading the refresh token

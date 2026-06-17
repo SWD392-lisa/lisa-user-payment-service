@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace ProjectLucy.Shared.Dtos.RegisterDtos
+namespace ProjectLucy.Application.DTOs.RegisterDtos
 {
     public class RegisterRequest
     {

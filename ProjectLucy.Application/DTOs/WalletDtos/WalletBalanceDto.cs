@@ -1,4 +1,4 @@
-namespace ProjectLucy.Shared.Dtos.WalletDtos;
+namespace ProjectLucy.Application.DTOs.WalletDtos;
 
 public class WalletBalanceDto
 {

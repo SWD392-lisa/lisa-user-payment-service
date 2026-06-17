@@ -3,7 +3,7 @@ using System.Text;
 using Microsoft.Extensions.Options;
 using ProjectLucy.Application.Interfaces;
 using ProjectLucy.Application.Settings;
-using ProjectLucy.Shared.Dtos.PaymentDtos;
+using ProjectLucy.Application.DTOs.PaymentDtos;
 
 namespace ProjectLucy.Infrastructure.Payment;
 

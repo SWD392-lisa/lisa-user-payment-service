@@ -1,5 +1,6 @@
 using MediatR;
-using ProjectLucy.Application.DTOs;
+using ProjectLucy.Application.DTOs.LoginDtos;
+using ProjectLucy.Application.DTOs.LoginDtos.Childs;
 using ProjectLucy.Application.Common;
 using ProjectLucy.Application.Common.Exceptions;
 using ProjectLucy.Application.Interfaces;
@@ -44,9 +45,9 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, Result<LoginRes
     public async Task<Result<LoginResponse>> Handle(LoginCommand cmd, CancellationToken ct)
     {
         // 1. Find user by email
-        var user = await _userRepo.GetByEmailAsync(cmd.Email.ToLower().Trim(), ct);
+        var user = await _userRepo.GetByEmailAsync(cmd.Request.Email.ToLower().Trim(), ct);
 
-        if (user is null || !BCrypt.Net.BCrypt.Verify(cmd.Password, user.UserHashPassword))
+        if (user is null || !BCrypt.Net.BCrypt.Verify(cmd.Request.Password, user.UserHashPassword))
             throw new UnauthorizedException("Invalid email or password");
 
         // 2. Load role (user.Role may be null if repo didn't eager-load it)

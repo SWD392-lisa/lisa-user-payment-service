@@ -1,4 +1,4 @@
-namespace ProjectLucy.Shared.Dtos.PaymentDtos;
+namespace ProjectLucy.Application.DTOs.ConfirmPaymentDtos;
 
 /// <summary>
 /// Request from the frontend after SePay redirects the user back.

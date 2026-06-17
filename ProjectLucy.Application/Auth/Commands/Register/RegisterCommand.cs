@@ -1,14 +1,8 @@
 using MediatR;
-using ProjectLucy.Application.DTOs;
+using ProjectLucy.Application.DTOs.RegisterDtos;
 using ProjectLucy.Application.Common;
 
 namespace ProjectLucy.Application.Auth.Commands.Register;
 
-public record RegisterCommand(
-    string FullName,
-    string Email,
-    string Password,
-    string ConfirmPassword,
-    DateOnly Birthday,
-    string? PhoneNumber
-) : IRequest<Result<RegisterResponse>>;
+public record RegisterCommand(RegisterRequest Request)
+    : IRequest<Result<RegisterResponse>>;

@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace ProjectLucy.Shared.Dtos.RefreshTokenDtos
+namespace ProjectLucy.Application.DTOs.RefreshTokenDtos
 {
     public class RefreshTokenRequest
     {

@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace ProjectLucy.Shared.Dtos.PaymentDtos;
+namespace ProjectLucy.Application.DTOs.PaymentDtos;
 
 /// <summary>
 /// Pre-built form payload that the frontend will submit (as a hidden HTML form

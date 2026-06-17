@@ -1,4 +1,4 @@
-namespace ProjectLucy.Shared.Dtos.PaymentDtos;
+namespace ProjectLucy.Application.DTOs.PaymentDtos;
 
 /// <summary>
 /// A single payment transaction shown in the user's payment history.

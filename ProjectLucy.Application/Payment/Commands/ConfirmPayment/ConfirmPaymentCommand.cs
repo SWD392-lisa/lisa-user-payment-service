@@ -1,6 +1,6 @@
 using MediatR;
 using ProjectLucy.Application.Common;
-using ProjectLucy.Shared.Dtos.PaymentDtos;
+using ProjectLucy.Application.DTOs.ConfirmPaymentDtos;
 
 namespace ProjectLucy.Application.Payment.Commands.ConfirmPayment;
 

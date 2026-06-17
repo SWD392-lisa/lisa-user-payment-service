@@ -1,7 +1,7 @@
 using MediatR;
 using ProjectLucy.Application.Common;
 using ProjectLucy.Domain.Interfaces;
-using ProjectLucy.Shared.Dtos.WalletDtos;
+using ProjectLucy.Application.DTOs.WalletDtos;
 
 namespace ProjectLucy.Application.Wallet.Queries.GetWalletBalance;
 

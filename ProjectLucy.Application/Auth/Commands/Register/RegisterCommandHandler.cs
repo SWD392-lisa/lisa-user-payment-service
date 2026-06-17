@@ -1,5 +1,5 @@
 using MediatR;
-using ProjectLucy.Application.DTOs;
+using ProjectLucy.Application.DTOs.RegisterDtos;
 using ProjectLucy.Application.Common;
 using ProjectLucy.Application.Common.Exceptions;
 using ProjectLucy.Application.Interfaces;
@@ -46,19 +46,19 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, Result<Re
             throw new ServerException($"Default role '{DefaultRoleCode}' not found. Please seed roles first.");
 
         // 4. Hash password (work factor 12 — same as before)
-        var hashedPassword = BCrypt.Net.BCrypt.HashPassword(cmd.Password, workFactor: 12);
+        var hashedPassword = BCrypt.Net.BCrypt.HashPassword(cmd.Request.Password, workFactor: 12);
 
         // 5. Create user entity
         var newUser = new User
         {
             UserId = Guid.NewGuid(),
-            UserFullName = cmd.FullName.Trim(),
-            UserEmail = cmd.Email.ToLower().Trim(),
+            UserFullName = cmd.Request.FullName.Trim(),
+            UserEmail = cmd.Request.Email.ToLower().Trim(),
             UserHashPassword = hashedPassword,
-            UserBirthday = cmd.Birthday,
-            UserPhoneNumber = string.IsNullOrWhiteSpace(cmd.PhoneNumber)
+            UserBirthday = cmd.Request.Birthday,
+            UserPhoneNumber = string.IsNullOrWhiteSpace(cmd.Request.PhoneNumber)
                 ? null
-                : cmd.PhoneNumber.Trim(),
+                : cmd.Request.PhoneNumber.Trim(),
             RoleId = defaultRole.RoleId,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow

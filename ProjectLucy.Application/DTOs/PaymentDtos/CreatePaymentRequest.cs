@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
-namespace ProjectLucy.Shared.Dtos.PaymentDtos;
+namespace ProjectLucy.Application.DTOs.PaymentDtos;
 
 public class CreatePaymentRequest
 {

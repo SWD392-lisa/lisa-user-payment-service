@@ -1,6 +1,7 @@
 using MediatR;
 using Microsoft.Extensions.Options;
-using ProjectLucy.Application.DTOs;
+using ProjectLucy.Application.DTOs.LoginDtos;
+using ProjectLucy.Application.DTOs.LoginDtos.Childs;
 using ProjectLucy.Application.Common;
 using ProjectLucy.Application.Common.Exceptions;
 using ProjectLucy.Application.Interfaces;
@@ -43,7 +44,7 @@ public class RefreshTokenCommandHandler : IRequestHandler<RefreshTokenCommand, R
     public async Task<Result<LoginResponse>> Handle(RefreshTokenCommand cmd, CancellationToken ct)
     {
         // 1. Find the stored refresh token
-        var storedToken = await _refreshTokenRepo.GetByTokenAsync(cmd.RefreshToken, ct);
+        var storedToken = await _refreshTokenRepo.GetByTokenAsync(cmd.Request.RefreshToken, ct);
 
         if (storedToken is null)
             throw new UnauthorizedException("Invalid refresh token");

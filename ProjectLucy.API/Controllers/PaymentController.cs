@@ -6,7 +6,8 @@ using ProjectLucy.Application.Payment.Commands.CreatePayment;
 using ProjectLucy.Application.Payment.Commands.ConfirmPayment;
 using ProjectLucy.Application.Payment.Commands.HandleIpn;
 using ProjectLucy.Application.Payment.Queries.GetPaymentHistory;
-using ProjectLucy.Shared.Dtos.PaymentDtos;
+using ProjectLucy.Application.DTOs.ConfirmPaymentDtos;
+using ProjectLucy.Application.DTOs.PaymentDtos;
 
 namespace ProjectLucy.API.Controllers;
 

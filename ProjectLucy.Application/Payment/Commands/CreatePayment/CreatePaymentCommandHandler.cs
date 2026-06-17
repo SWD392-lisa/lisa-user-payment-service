@@ -4,7 +4,7 @@ using ProjectLucy.Application.Common.Exceptions;
 using ProjectLucy.Application.Interfaces;
 using ProjectLucy.Domain.Entities;
 using ProjectLucy.Domain.Interfaces;
-using ProjectLucy.Shared.Dtos.PaymentDtos;
+using ProjectLucy.Application.DTOs.PaymentDtos;
 
 namespace ProjectLucy.Application.Payment.Commands.CreatePayment;
 

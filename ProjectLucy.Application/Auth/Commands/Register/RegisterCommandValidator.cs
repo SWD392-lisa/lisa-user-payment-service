@@ -11,37 +11,37 @@ public class RegisterCommandValidator : AbstractValidator<RegisterCommand>
     {
         _userRepo = userRepo;
 
-        RuleFor(x => x.FullName)
+        RuleFor(x => x.Request.FullName)
             .NotEmpty().WithMessage("Full name is required")
             .MaximumLength(255).WithMessage("Full name cannot exceed 255 characters");
 
-        RuleFor(x => x.Email)
+        RuleFor(x => x.Request.Email)
             .NotEmpty().WithMessage("Email is required")
             .EmailAddress().WithMessage("Invalid email format")
             .MaximumLength(255)
             .MustAsync(BeUniqueEmailAsync)
                 .WithMessage("Email is already registered");
 
-        RuleFor(x => x.Password)
+        RuleFor(x => x.Request.Password)
             .NotEmpty().WithMessage("Password is required")
             .MinimumLength(8).WithMessage("Password must be at least 8 characters")
             .Matches(@"[A-Z]").WithMessage("Password must contain at least 1 uppercase letter")
             .Matches(@"[0-9]").WithMessage("Password must contain at least 1 number")
             .Matches(@"[^a-zA-Z0-9\s]").WithMessage("Password must contain at least 1 special character");
 
-        RuleFor(x => x.ConfirmPassword)
+        RuleFor(x => x.Request.ConfirmPassword)
             .NotEmpty().WithMessage("Confirm password is required")
-            .Equal(x => x.Password).WithMessage("Passwords do not match");
+            .Equal(x => x.Request.Password).WithMessage("Passwords do not match");
 
-        RuleFor(x => x.Birthday)
+        RuleFor(x => x.Request.Birthday)
             .NotEmpty().WithMessage("Birthday is required");
 
-        RuleFor(x => x.PhoneNumber)
+        RuleFor(x => x.Request.PhoneNumber)
             .MaximumLength(30).WithMessage("Phone number cannot exceed 30 characters")
             .Matches(@"^[\d\s\+\-\(\)]+$").WithMessage("Invalid phone number format")
             .MustAsync(BeUniquePhoneAsync)
                 .WithMessage("Phone number is already registered")
-            .When(x => !string.IsNullOrWhiteSpace(x.PhoneNumber));
+            .When(x => !string.IsNullOrWhiteSpace(x.Request.PhoneNumber));
     }
 
     private Task<bool> BeUniqueEmailAsync(RegisterCommand cmd, string email, CancellationToken ct)

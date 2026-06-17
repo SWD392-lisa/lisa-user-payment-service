@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace ProjectLucy.Shared.Dtos.LoginDtos
+namespace ProjectLucy.Application.DTOs.LoginDtos
 {
     public class LoginRequest
     {

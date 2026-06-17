@@ -1,4 +1,4 @@
-namespace ProjectLucy.Shared.Dtos.LoginDtos.Childs
+namespace ProjectLucy.Application.DTOs.LoginDtos.Childs
 {
     /// <summary>
     /// Basic user info embedded inside login / refresh-token responses.

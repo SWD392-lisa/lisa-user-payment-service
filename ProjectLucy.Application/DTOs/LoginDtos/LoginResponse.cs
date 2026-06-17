@@ -1,6 +1,6 @@
-using ProjectLucy.Shared.Dtos.LoginDtos.Childs;
+using ProjectLucy.Application.DTOs.LoginDtos.Childs;
 
-namespace ProjectLucy.Shared.Dtos.LoginDtos
+namespace ProjectLucy.Application.DTOs.LoginDtos
 {
     public class LoginResponse
     {
