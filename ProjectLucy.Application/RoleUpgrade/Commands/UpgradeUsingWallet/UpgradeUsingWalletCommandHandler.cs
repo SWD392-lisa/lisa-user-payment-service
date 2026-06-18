@@ -94,7 +94,7 @@ public class UpgradeUsingWalletCommandHandler : IRequestHandler<UpgradeUsingWall
         var ledgerEntry = new WalletLedger
         {
             WalletId = wallet.Id,
-            TransactionId = transaction.Id,
+            Transaction = transaction,
             Amount = -rolePrice.Price,
             BalanceAfter = wallet.Balance,
             EntryType = "ROLE_UPGRADE",
@@ -107,7 +107,7 @@ public class UpgradeUsingWalletCommandHandler : IRequestHandler<UpgradeUsingWall
         var upgradeOrder = new RoleUpgradeOrder
         {
             Id = Guid.NewGuid(),
-            TransactionId = transaction.Id,
+            Transaction = transaction,
             UserId = cmd.UserId,
             FromRoleId = user.RoleId,
             ToRoleId = rolePrice.RoleId,
