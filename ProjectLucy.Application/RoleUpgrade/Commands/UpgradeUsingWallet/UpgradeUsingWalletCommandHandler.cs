@@ -95,7 +95,7 @@ public class UpgradeUsingWalletCommandHandler : IRequestHandler<UpgradeUsingWall
         {
             WalletId = wallet.Id,
             Transaction = transaction,
-            Amount = -rolePrice.Price,
+            Amount = rolePrice.Price,
             BalanceAfter = wallet.Balance,
             EntryType = "ROLE_UPGRADE",
             Note = $"Nâng cấp {rolePrice.Role.RoleName} qua ví",
