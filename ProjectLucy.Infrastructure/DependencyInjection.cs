@@ -25,6 +25,8 @@ public static class DependencyInjection
         services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
         services.AddScoped<ITransactionRepository, TransactionRepository>();
         services.AddScoped<IWalletRepository, WalletRepository>();
+        services.AddScoped<IRolePriceRepository, RolePriceRepository>();
+        services.AddScoped<IRoleUpgradeOrderRepository, RoleUpgradeOrderRepository>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<IJwtTokenService, JwtTokenService>();
         services.AddScoped<ISePayService, SePayService>();

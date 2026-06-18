@@ -36,8 +36,12 @@ public class SePayService : ISePayService
         _options = options.Value;
     }
 
-    public SePayFormData BuildFormData(CreatePaymentRequest request, long transactionId)
+    public SePayFormData BuildFormData(CreatePaymentRequest request, long transactionId, Dictionary<string, string>? extraCallbackParams = null)
     {
+        var extraQuery = extraCallbackParams?.Any() == true
+            ? "&" + string.Join("&", extraCallbackParams.Select(kv => $"{kv.Key}={kv.Value}"))
+            : string.Empty;
+
         var fields = new Dictionary<string, string>
         {
             ["order_amount"] = request.OrderAmount.ToString(),
@@ -46,9 +50,9 @@ public class SePayService : ISePayService
             ["operation"] = "PURCHASE",
             ["order_description"] = request.OrderDescription,
             ["order_invoice_number"] = request.OrderInvoiceNumber,
-            ["success_url"] = $"{_options.SuccessUrl}?orderInvoiceNumber={request.OrderInvoiceNumber}&orderAmount={request.OrderAmount}&transactionId={transactionId}",
-            ["error_url"] = $"{_options.ErrorUrl}?orderInvoiceNumber={request.OrderInvoiceNumber}&orderAmount={request.OrderAmount}&transactionId={transactionId}",
-            ["cancel_url"] = $"{_options.CancelUrl}?orderInvoiceNumber={request.OrderInvoiceNumber}&orderAmount={request.OrderAmount}&transactionId={transactionId}",
+            ["success_url"] = $"{_options.SuccessUrl}?orderInvoiceNumber={request.OrderInvoiceNumber}&orderAmount={request.OrderAmount}&transactionId={transactionId}{extraQuery}",
+            ["error_url"] = $"{_options.ErrorUrl}?orderInvoiceNumber={request.OrderInvoiceNumber}&orderAmount={request.OrderAmount}&transactionId={transactionId}{extraQuery}",
+            ["cancel_url"] = $"{_options.CancelUrl}?orderInvoiceNumber={request.OrderInvoiceNumber}&orderAmount={request.OrderAmount}&transactionId={transactionId}{extraQuery}",
         };
 
         if (!string.IsNullOrWhiteSpace(request.CustomerId))

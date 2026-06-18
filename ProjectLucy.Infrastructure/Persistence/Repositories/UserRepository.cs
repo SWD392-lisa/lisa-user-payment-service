@@ -23,6 +23,10 @@ public class UserRepository : IUserRepository
             .AsNoTracking()
             .FirstOrDefaultAsync(user => user.UserId == userId, ct);
 
+    public Task<User?> GetByIdTrackedAsync(Guid userId, CancellationToken ct = default)
+        => _context.Users
+            .FirstOrDefaultAsync(user => user.UserId == userId, ct);
+
     public Task<bool> ExistsByEmailAsync(string email, CancellationToken ct = default)
         => _context.Users
             .AsNoTracking()
