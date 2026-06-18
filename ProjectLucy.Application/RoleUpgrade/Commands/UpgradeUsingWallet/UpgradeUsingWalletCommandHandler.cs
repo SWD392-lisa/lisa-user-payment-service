@@ -80,7 +80,7 @@ public class UpgradeUsingWalletCommandHandler : IRequestHandler<UpgradeUsingWall
             Currency = rolePrice.Currency ?? "VND",
             TransactionContent = $"Nâng cấp tài khoản lên {rolePrice.Role.RoleName}",
             Status = "completed",
-            ReferenceCode = $"UPG_WALLET_{DateTime.UtcNow:yyyyMMddHHmmss}_{Guid.NewGuid():N}"[..100],
+            ReferenceCode = $"UPG_WALLET_{DateTime.UtcNow:yyyyMMddHHmmss}_{Guid.NewGuid():N}",
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
         };
