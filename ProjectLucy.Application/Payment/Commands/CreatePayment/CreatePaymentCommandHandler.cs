@@ -14,9 +14,6 @@ public class CreatePaymentCommandHandler : IRequestHandler<CreatePaymentCommand,
     private readonly ITransactionRepository _transactionRepo;
     private readonly IUnitOfWork _unitOfWork;
 
-    /// <summary>transaction_type.code used for SePay online payments.</summary>
-    public const string SePayTransactionTypeCode = "ROLE_UPGRADE_WALLET";
-
     public CreatePaymentCommandHandler(
         ISePayService sePayService,
         ITransactionRepository transactionRepo,
@@ -30,10 +27,10 @@ public class CreatePaymentCommandHandler : IRequestHandler<CreatePaymentCommand,
     public async Task<Result<SePayFormData>> Handle(CreatePaymentCommand cmd, CancellationToken ct)
     {
         // 1. Resolve the SePay transaction type (must be seeded in transaction_type)
-        var typeId = await _transactionRepo.GetTypeIdByCodeAsync(SePayTransactionTypeCode, ct);
+        var typeId = await _transactionRepo.GetTypeIdByCodeAsync(cmd.Request.TransactionTypeCode, ct);
         if (typeId is null)
             throw new ServerException(
-                $"Transaction type '{SePayTransactionTypeCode}' not found. Please seed transaction types first.");
+                $"Transaction type '{cmd.Request.TransactionTypeCode}' not found. Please seed transaction types first.");
 
         // 2. Persist a PENDING transaction so the IPN handler can resolve it later.
         //    reference_code holds the unique gateway invoice number.

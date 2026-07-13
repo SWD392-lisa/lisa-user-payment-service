@@ -27,4 +27,9 @@ public class CreatePaymentRequest
     /// <summary>Optional. One of CARD, BANK_TRANSFER, NAPAS_BANK_TRANSFER.</summary>
     [MaxLength(50)]
     public string? PaymentMethod { get; set; }
+
+    [JsonPropertyName("transactionTypeCode")]
+    [Required(ErrorMessage = "transaction_type_code is required")]
+    [MaxLength(50)]
+    public string TransactionTypeCode { get; set; } = string.Empty;
 }
