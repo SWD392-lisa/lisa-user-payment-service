@@ -22,11 +22,6 @@
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.11" />
   </ItemGroup>
 
-  <!-- TODO: Context/NeondbContext.cs references entities (RolePrice, Transaction,
-       TransactionType) that do not exist in Domain yet. Excluded from build until
-       those entities are added. Remove this line once the file is fixed. -->
-  <ItemGroup>
-    <Compile Remove="Context/NeondbContext.cs" />
-  </ItemGroup>
+
 
 </Project>

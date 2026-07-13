@@ -18,7 +18,7 @@ public class CreateUpgradePaymentCommandHandler : IRequestHandler<CreateUpgradeP
     private readonly ISePayService _sePayService;
     private readonly IUnitOfWork _unitOfWork;
 
-    private const string TransactionTypeCode = "ROLE_UPGRADE_SEPAY";
+    private const string TransactionTypeCode = "ROLE_UPGRADE";
 
     public CreateUpgradePaymentCommandHandler(
         IUserRepository userRepo,
