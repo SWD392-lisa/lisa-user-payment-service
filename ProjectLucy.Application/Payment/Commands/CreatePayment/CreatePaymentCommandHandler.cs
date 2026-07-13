@@ -15,7 +15,7 @@ public class CreatePaymentCommandHandler : IRequestHandler<CreatePaymentCommand,
     private readonly IUnitOfWork _unitOfWork;
 
     /// <summary>transaction_type.code used for SePay online payments.</summary>
-    public const string SePayTransactionTypeCode = "ONLINE_SEPAY";
+    public const string SePayTransactionTypeCode = "ROLE_UPGRADE_WALLET";
 
     public CreatePaymentCommandHandler(
         ISePayService sePayService,
