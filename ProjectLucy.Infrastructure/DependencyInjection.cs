@@ -27,6 +27,8 @@ public static class DependencyInjection
         services.AddScoped<IWalletRepository, WalletRepository>();
         services.AddScoped<IRolePriceRepository, RolePriceRepository>();
         services.AddScoped<IRoleUpgradeOrderRepository, RoleUpgradeOrderRepository>();
+        services.AddScoped<IGiftCatalogRepository, GiftCatalogRepository>();
+        services.AddScoped<IGiftTransactionRepository, GiftTransactionRepository>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<IJwtTokenService, JwtTokenService>();
         services.AddScoped<ISePayService, SePayService>();
