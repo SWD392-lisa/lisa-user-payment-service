@@ -11,7 +11,15 @@ public interface IUserRepository
     Task<User?> GetByEmailAsync(string email, CancellationToken ct = default);
     Task<User?> GetByIdAsync(Guid userId, CancellationToken ct = default);
     Task<User?> GetByIdTrackedAsync(Guid userId, CancellationToken ct = default);
+    Task<(IReadOnlyList<User> Items, int Total)> SearchAsync(
+        string? search,
+        string? roleCode,
+        bool? isActive,
+        int skip,
+        int take,
+        CancellationToken ct = default);
     Task<bool> ExistsByEmailAsync(string email, CancellationToken ct = default);
     Task<bool> ExistsByPhoneAsync(string phone, CancellationToken ct = default);
     Task AddAsync(User user, CancellationToken ct = default);
+    Task RevokeTokensAsync(Guid userId, CancellationToken ct = default);
 }

@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using ProjectLucy.Infrastructure.Persistence;
@@ -11,9 +12,11 @@ using ProjectLucy.Infrastructure.Persistence;
 namespace ProjectLucy.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(NeonDbContext))]
-    partial class NeondbContextModelSnapshot : ModelSnapshot
+    [Migration("20260720143000_AddWalletAndCommerceSchema")]
+    partial class AddWalletAndCommerceSchema
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -583,21 +586,9 @@ namespace ProjectLucy.Infrastructure.Persistence.Migrations
                         .HasColumnName("created_at")
                         .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("boolean")
-                        .HasColumnName("is_active");
-
                     b.Property<int>("RoleId")
                         .HasColumnType("integer")
                         .HasColumnName("role_id");
-
-                    b.Property<DateTime?>("SuspendedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("suspended_at");
-
-                    b.Property<string>("SuspensionReason")
-                        .HasColumnType("text")
-                        .HasColumnName("suspension_reason");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("timestamp with time zone")

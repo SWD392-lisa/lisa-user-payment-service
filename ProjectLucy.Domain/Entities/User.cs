@@ -45,6 +45,15 @@ public partial class User
     [Column("role_id")]
     public int RoleId { get; set; }
 
+    [Column("is_active")]
+    public bool IsActive { get; set; } = true;
+
+    [Column("suspended_at")]
+    public DateTime? SuspendedAt { get; set; }
+
+    [Column("suspension_reason")]
+    public string? SuspensionReason { get; set; }
+
     [InverseProperty("Receiver")]
     public virtual ICollection<GiftTransaction> GiftTransactionReceivers { get; set; } = new List<GiftTransaction>();
 

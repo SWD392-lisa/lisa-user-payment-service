@@ -6,6 +6,7 @@ using ProjectLucy.Application;
 using ProjectLucy.Application.Settings;
 using ProjectLucy.Infrastructure;
 using System.Text;
+using System.Security.Claims;
 using Yarp.ReverseProxy.Transforms;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -83,7 +84,15 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("CreatorAccess", policy => policy
+        .RequireAuthenticatedUser()
+        .RequireAssertion(context => context.User.Claims
+            .Where(claim => claim.Type == ClaimTypes.Role || claim.Type == "role")
+            .Select(claim => claim.Value.Trim().ToUpperInvariant())
+            .Any(value => value is "3" or "4" or "SUPER" or "CREATOR")));
+});
 builder.Services.AddControllers();
 
 // Đăng ký YARP Reverse Proxy với các Transforms chuyển tiếp Header từ JWT Claims
