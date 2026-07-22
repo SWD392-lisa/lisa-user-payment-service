@@ -60,6 +60,9 @@ public class RefreshTokenCommandHandler : IRequestHandler<RefreshTokenCommand, R
         if (user is null)
             throw new UnauthorizedException("User not found");
 
+        if (!user.IsActive)
+            throw new UnauthorizedException("This account is suspended");
+
         if (user.Role is null)
             user.Role = (await _roleRepo.GetByIdAsync(user.RoleId, ct))!;
 

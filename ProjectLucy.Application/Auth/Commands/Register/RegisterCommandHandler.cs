@@ -60,6 +60,7 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, Result<Re
                 ? null
                 : cmd.Request.PhoneNumber.Trim(),
             RoleId = defaultRole.RoleId,
+            IsActive = true,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
         };

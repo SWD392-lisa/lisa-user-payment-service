@@ -50,6 +50,9 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, Result<LoginRes
         if (user is null || !BCrypt.Net.BCrypt.Verify(cmd.Request.Password, user.UserHashPassword))
             throw new UnauthorizedException("Invalid email or password");
 
+        if (!user.IsActive)
+            throw new UnauthorizedException("This account is suspended");
+
         // 2. Load role (user.Role may be null if repo didn't eager-load it)
         if (user.Role is null)
             user.Role = (await _roleRepo.GetByIdAsync(user.RoleId, ct))!;
