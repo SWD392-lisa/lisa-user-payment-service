@@ -1,0 +1,106 @@
+{
+  // Config KHÔNG chứa secret -> commit được (appsettings*.json bị .gitignore bỏ qua).
+  // Địa chỉ downstream ở đây chỉ là placeholder, Program.cs override từ biến môi trường.
+  // Secret (JwtSettings) nạp từ env (Docker) hoặc appsettings.json (local dev).
+  "AllowedHosts": "*",
+  "Logging": {
+    "Console": {
+      "IncludeScopes": true
+    }
+  },
+  "ReverseProxy": {
+    "Routes": {
+      // ----- curriculum-service: curriculum / LMS / AI (tự validate JWT) -----
+      "curriculum-route": {
+        "ClusterId": "curriculum-cluster",
+        "RateLimiterPolicy": "fixed",
+        "Match": { "Path": "/api/curriculum/{**catch-all}" }
+      },
+      "lms-route": {
+        "ClusterId": "curriculum-cluster",
+        "RateLimiterPolicy": "fixed",
+        "Match": { "Path": "/api/lms/{**catch-all}" }
+      },
+      "ai-route": {
+        "ClusterId": "curriculum-cluster",
+        "RateLimiterPolicy": "fixed",
+        "Match": { "Path": "/api/ai/{**catch-all}" }
+      },
+      // ----- repo-service: CHƯA có auth riêng -> gateway bắt buộc JWT -----
+      "repos-route": {
+        "ClusterId": "repo-cluster",
+        "AuthorizationPolicy": "authenticated",
+        "RateLimiterPolicy": "fixed",
+        "Match": { "Path": "/api/repos/{**catch-all}" }
+      },
+      // ----- realtime-service: Agora / rooms / podcasts / notifications / recordings / admin / socket.io -----
+      "agora-route": {
+        "ClusterId": "realtime-cluster",
+        "RateLimiterPolicy": "fixed",
+        "Match": { "Path": "/api/agora/{**catch-all}" }
+      },
+      "rooms-route": {
+        "ClusterId": "realtime-cluster",
+        "RateLimiterPolicy": "fixed",
+        "Match": { "Path": "/api/rooms/{**catch-all}" }
+      },
+      "podcasts-route": {
+        "ClusterId": "realtime-cluster",
+        "RateLimiterPolicy": "fixed",
+        "Match": { "Path": "/api/podcasts/{**catch-all}" }
+      },
+      "notifications-route": {
+        "ClusterId": "realtime-cluster",
+        "RateLimiterPolicy": "fixed",
+        "Match": { "Path": "/api/notifications/{**catch-all}" }
+      },
+      "recordings-route": {
+        "ClusterId": "realtime-cluster",
+        "RateLimiterPolicy": "fixed",
+        "Match": { "Path": "/api/recordings/{**catch-all}" }
+      },
+      "realtime-admin-route": {
+        "ClusterId": "realtime-cluster",
+        "RateLimiterPolicy": "fixed",
+        "Match": { "Path": "/api/admin/{**catch-all}" }
+      },
+      // WebSocket: KHÔNG gắn rate limiter (kết nối long-lived)
+      "socketio-route": {
+        "ClusterId": "realtime-cluster",
+        "Match": { "Path": "/socket.io/{**catch-all}" }
+      },
+      // ----- Default: User/Payment service (ProjectLucy.API). Ít cụ thể nhất -> khớp cuối -----
+      "api-route": {
+        "ClusterId": "api-cluster",
+        "RateLimiterPolicy": "fixed",
+        "Match": { "Path": "/api/{**catch-all}" }
+      }
+    },
+    "Clusters": {
+      "api-cluster": {
+        "LoadBalancingPolicy": "RoundRobin",
+        "Destinations": {
+          "api-1": { "Address": "http://localhost:5080/" }
+        }
+      },
+      "curriculum-cluster": {
+        "LoadBalancingPolicy": "RoundRobin",
+        "Destinations": {
+          "curriculum-1": { "Address": "http://localhost:8080/" }
+        }
+      },
+      "repo-cluster": {
+        "LoadBalancingPolicy": "RoundRobin",
+        "Destinations": {
+          "repo-1": { "Address": "http://localhost:8082/" }
+        }
+      },
+      "realtime-cluster": {
+        "LoadBalancingPolicy": "RoundRobin",
+        "Destinations": {
+          "realtime-1": { "Address": "http://localhost:3000/" }
+        }
+      }
+    }
+  }
+}

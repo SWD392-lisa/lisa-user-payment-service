@@ -5,4 +5,6 @@
   <Project Path="ProjectLucy.Infrastructure/ProjectLucy.Infrastructure.csproj" />
   <Project Path="ProjectLucy.Shared/ProjectLucy.Shared.csproj" Id="3230bac2-3912-470e-88e8-2be089c04fc8" />
   <Project Path="ProjectLucy.API.Tests/ProjectLucy.API.Tests.csproj" />
+  <Project Path="ProjectLucy.Gateway/ProjectLucy.Gateway.csproj" />
+  <Project Path="ProjectLucy.Gateway.Tests/ProjectLucy.Gateway.Tests.csproj" />
 </Solution>

@@ -1,12 +1,42 @@
 services:
+  projectlucy-gateway:
+    build:
+      context: .
+      dockerfile: ProjectLucy.Gateway/Dockerfile
+    image: projectlucy-gateway:latest
+    container_name: projectlucy-gateway
+    ports:
+      - "8080:8080"
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_URLS: http://+:8080
+      API_SERVICE_URL: http://projectlucy-api:8080/
+      # Các service con nằm repo khác. Mặc định trỏ host qua host.docker.internal;
+      # nếu chúng cùng join network lucy-net thì đổi sang container name.
+      CURRICULUM_SERVICE_URL: ${CURRICULUM_SERVICE_URL:-http://host.docker.internal:8080/}
+      REPO_SERVICE_URL: ${REPO_SERVICE_URL:-http://host.docker.internal:8082/}
+      REALTIME_SERVICE_URL: ${REALTIME_SERVICE_URL:-http://host.docker.internal:3000/}
+      JwtSettings__SecretKey: ${JWT_SECRET_KEY}
+      JwtSettings__Issuer: ${JWT_ISSUER:-ProjectLucy.API}
+      JwtSettings__Audience: ${JWT_AUDIENCE:-ProjectLucy.Client}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS}
+      RateLimiting__PermitLimit: ${RATE_LIMIT_PERMIT:-100}
+      RateLimiting__WindowSeconds: ${RATE_LIMIT_WINDOW:-60}
+    depends_on:
+      - projectlucy-api
+    networks:
+      - lucy-net
+    restart: unless-stopped
+
   projectlucy-api:
     build:
       context: .
       dockerfile: Dockerfile
     image: projectlucy-api:latest
     container_name: projectlucy-api
-    ports:
-      - "8080:8080"
+    # Nội bộ: không map ra host nữa. Chỉ gateway gọi tới qua network lucy-net.
+    expose:
+      - "8080"
     environment:
       ASPNETCORE_ENVIRONMENT: Production
       ASPNETCORE_URLS: http://+:8080
@@ -25,4 +55,13 @@ services:
       JwtSettings__Audience: ${JWT_AUDIENCE:-ProjectLucy.Client}
       JwtSettings__AccessTokenExpirationMinutes: ${JWT_ACCESS_TOKEN_EXPIRATION_MINUTES:-15}
       JwtSettings__RefreshTokenExpirationDays: ${JWT_REFRESH_TOKEN_EXPIRATION_DAYS:-7}
+    networks:
+      - lucy-net
     restart: unless-stopped
+
+# Network chung để gateway và các service (kể cả service con ở repo khác) nói chuyện nội bộ.
+# Service con: thêm `networks: [lucy-net]` + khai báo `lucy-net: { external: true, name: lucy-net }`.
+networks:
+  lucy-net:
+    name: lucy-net
+    driver: bridge
