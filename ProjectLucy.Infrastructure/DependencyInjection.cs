@@ -30,6 +30,7 @@ public static class DependencyInjection
         services.AddScoped<IRoleUpgradeOrderRepository, RoleUpgradeOrderRepository>();
         services.AddScoped<IGiftCatalogRepository, GiftCatalogRepository>();
         services.AddScoped<IGiftTransactionRepository, GiftTransactionRepository>();
+        services.AddScoped<IMentorLeaderboardRepository, MentorLeaderboardRepository>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<IJwtTokenService, JwtTokenService>();
         services.AddScoped<ISePayService, SePayService>();

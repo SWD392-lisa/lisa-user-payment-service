@@ -92,7 +92,14 @@ builder.Services.AddAuthorization(options =>
             .Where(claim => claim.Type == ClaimTypes.Role || claim.Type == "role")
             .Select(claim => claim.Value.Trim().ToUpperInvariant())
             .Any(value => value is "3" or "4" or "SUPER" or "CREATOR")));
+    options.AddPolicy("MentorLeaderboardAccess", policy => policy
+        .RequireAuthenticatedUser()
+        .RequireAssertion(context => context.User.Claims
+            .Where(claim => claim.Type == ClaimTypes.Role || claim.Type == "role")
+            .Select(claim => claim.Value.Trim().ToUpperInvariant())
+            .Any(value => value is "2" or "3" or "PRO" or "MENTOR" or "SUPER" or "CREATOR")));
 });
+builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddControllers();
 
 // Đăng ký YARP Reverse Proxy với các Transforms chuyển tiếp Header từ JWT Claims
