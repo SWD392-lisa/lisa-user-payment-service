@@ -6,7 +6,6 @@ using ProjectLucy.Application;
 using ProjectLucy.Application.Settings;
 using ProjectLucy.Infrastructure;
 using System.Text;
-using Yarp.ReverseProxy.Transforms;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -35,22 +34,8 @@ if (File.Exists(envPath))
     }
 }
 
-// Cấu hình động toàn bộ thông tin YARP cho Realtime NestJS Service từ biến môi trường
-var realtimeUrl = builder.Configuration["REALTIME_SERVICE_URL"] ?? "http://localhost:3000/";
-var authPolicy = builder.Configuration["REALTIME_SERVICE_AUTH_POLICY"] ?? "Default";
-var clusterId = builder.Configuration["REALTIME_SERVICE_CLUSTER_ID"] ?? "realtime-cluster";
-var agoraPath = builder.Configuration["REALTIME_SERVICE_AGORA_PATH"] ?? "/api/agora/{**catch-all}";
-var socketioPath = builder.Configuration["REALTIME_SERVICE_SOCKETIO_PATH"] ?? "/socket.io/{**catch-all}";
-
-builder.Configuration["ReverseProxy:Routes:agora-route:ClusterId"] = clusterId;
-builder.Configuration["ReverseProxy:Routes:agora-route:AuthorizationPolicy"] = authPolicy;
-builder.Configuration["ReverseProxy:Routes:agora-route:Match:Path"] = agoraPath;
-
-builder.Configuration["ReverseProxy:Routes:socketio-route:ClusterId"] = clusterId;
-builder.Configuration["ReverseProxy:Routes:socketio-route:AuthorizationPolicy"] = authPolicy;
-builder.Configuration["ReverseProxy:Routes:socketio-route:Match:Path"] = socketioPath;
-
-builder.Configuration["ReverseProxy:Clusters:realtime-cluster:Destinations:nest-realtime-instance:Address"] = realtimeUrl;
+// Reverse proxy / API gateway đã tách sang project ProjectLucy.Gateway.
+// Service này giờ chỉ là User/Payment backend, chạy nội bộ sau gateway.
 
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
@@ -85,30 +70,6 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddAuthorization();
 builder.Services.AddControllers();
-
-// Đăng ký YARP Reverse Proxy với các Transforms chuyển tiếp Header từ JWT Claims
-builder.Services.AddReverseProxy()
-    .LoadFromConfig(builder.Configuration.GetSection("ReverseProxy"))
-    .AddTransforms(builderContext =>
-    {
-        builderContext.AddRequestTransform(transformContext =>
-        {
-            var user = transformContext.HttpContext.User;
-            if (user.Identity?.IsAuthenticated == true)
-            {
-                var userId = user.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-                var userName = user.FindFirst(System.Security.Claims.ClaimTypes.Name ?? System.Security.Claims.ClaimTypes.GivenName)?.Value;
-                var userEmail = user.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
-                var userRole = user.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value;
-
-                if (!string.IsNullOrEmpty(userId)) transformContext.ProxyRequest.Headers.Add("X-User-Id", userId);
-                if (!string.IsNullOrEmpty(userName)) transformContext.ProxyRequest.Headers.Add("X-User-Name", userName);
-                if (!string.IsNullOrEmpty(userEmail)) transformContext.ProxyRequest.Headers.Add("X-User-Email", userEmail);
-                if (!string.IsNullOrEmpty(userRole)) transformContext.ProxyRequest.Headers.Add("X-User-Role", userRole);
-            }
-            return ValueTask.CompletedTask;
-        });
-    });
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
@@ -187,8 +148,8 @@ if (!app.Environment.IsDevelopment())
 app.UseAuthentication();
 app.UseAuthorization();
 
-// Kích hoạt YARP Reverse Proxy middleware
-app.MapReverseProxy();
+// Health endpoint cho gateway health-check / load balancing
+app.MapGet("/health", () => Results.Ok(new { service = "projectlucy-api", status = "ok" }));
 
 app.MapControllers();
 
