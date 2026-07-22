@@ -8,6 +8,10 @@ namespace ProjectLucy.Infrastructure.Persistence;
 
 public partial class NeonDbContext : DbContext
 {
+    public virtual DbSet<AnonymousRoomIdentity> AnonymousRoomIdentities { get; set; }
+    public virtual DbSet<RoomGiftRecipient> RoomGiftRecipients { get; set; }
+    public virtual DbSet<GiftEventOutbox> GiftEventOutboxes { get; set; }
+
     public NeonDbContext()
     {
     }
@@ -46,6 +50,31 @@ public partial class NeonDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<AnonymousRoomIdentity>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("anonymous_room_identity_pkey");
+            entity.Property(e => e.Id).HasDefaultValueSql("gen_random_uuid()");
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("now()");
+            entity.HasOne(e => e.User).WithMany().HasForeignKey(e => e.UserId)
+                .OnDelete(DeleteBehavior.Cascade).HasConstraintName("fk_anonymous_room_identity_user");
+        });
+
+        modelBuilder.Entity<RoomGiftRecipient>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("room_gift_recipient_pkey");
+            entity.Property(e => e.Id).HasDefaultValueSql("gen_random_uuid()");
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("now()");
+            entity.HasOne(e => e.Recipient).WithMany().HasForeignKey(e => e.RecipientUserId)
+                .OnDelete(DeleteBehavior.Cascade).HasConstraintName("fk_room_gift_recipient_user");
+        });
+
+        modelBuilder.Entity<GiftEventOutbox>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("gift_event_outbox_pkey");
+            entity.Property(e => e.Id).HasDefaultValueSql("gen_random_uuid()");
+            entity.Property(e => e.CreatedAt).HasDefaultValueSql("now()");
+        });
+
         modelBuilder.Entity<GiftCatalog>(entity =>
         {
             entity.HasKey(e => e.Id).HasName("gift_catalog_pkey");

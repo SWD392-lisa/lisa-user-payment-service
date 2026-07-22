@@ -16,6 +16,11 @@ public class GiftTransactionRepository : IGiftTransactionRepository
     public Task AddAsync(GiftTransaction txn, CancellationToken ct = default)
         => _context.GiftTransactions.AddAsync(txn, ct).AsTask();
 
+    public Task<GiftTransaction?> GetByIdempotencyKeyAsync(Guid idempotencyKey, CancellationToken ct = default)
+        => _context.GiftTransactions.AsNoTracking()
+            .Include(t => t.Gift).Include(t => t.Sender).Include(t => t.Receiver)
+            .SingleOrDefaultAsync(t => t.IdempotencyKey == idempotencyKey, ct);
+
     public Task<IReadOnlyList<GiftTransaction>> GetBySessionAsync(Guid roomSessionId, CancellationToken ct = default)
         => _context.GiftTransactions
             .AsNoTracking()

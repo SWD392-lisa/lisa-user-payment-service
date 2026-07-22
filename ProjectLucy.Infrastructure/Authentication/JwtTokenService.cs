@@ -53,6 +53,34 @@ public class JwtTokenService : IJwtTokenService
         return Convert.ToBase64String(randomBytes);
     }
 
+    public string GenerateRoomAccessToken(AnonymousRoomIdentity identity)
+    {
+        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSettings.SecretKey));
+        var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+        var expires = identity.ExpiresAt <= DateTime.UtcNow
+            ? DateTime.UtcNow.AddHours(4)
+            : identity.ExpiresAt;
+        var claims = new List<Claim>
+        {
+            new(JwtRegisteredClaimNames.Sub, identity.AnonymousId.ToString()),
+            new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+            new(ClaimTypes.NameIdentifier, identity.AnonymousId.ToString()),
+            new(ClaimTypes.Name, identity.DisplayName),
+            new(ClaimTypes.Role, "1"),
+            new("token_type", "room_anonymous"),
+            new("room_session_id", identity.RoomSessionId.ToString()),
+            new("persona_code", identity.PersonaCode),
+            new("persona_asset_url", identity.PersonaAssetUrl)
+        };
+        var token = new JwtSecurityToken(
+            issuer: _jwtSettings.Issuer,
+            audience: _jwtSettings.Audience,
+            claims: claims,
+            expires: expires,
+            signingCredentials: credentials);
+        return new JwtSecurityTokenHandler().WriteToken(token);
+    }
+
     public ClaimsPrincipal? GetPrincipalFromExpiredToken(string token)
     {
         var tokenValidationParameters = new TokenValidationParameters

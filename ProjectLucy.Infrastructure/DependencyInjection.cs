@@ -8,6 +8,7 @@ using ProjectLucy.Infrastructure.Authentication;
 using ProjectLucy.Infrastructure.Payment;
 using ProjectLucy.Infrastructure.Persistence;
 using ProjectLucy.Infrastructure.Persistence.Repositories;
+using ProjectLucy.Infrastructure.Integration;
 
 namespace ProjectLucy.Infrastructure;
 
@@ -32,6 +33,8 @@ public static class DependencyInjection
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<IJwtTokenService, JwtTokenService>();
         services.AddScoped<ISePayService, SePayService>();
+        services.AddHttpClient(nameof(GiftEventOutboxWorker));
+        services.AddHostedService<GiftEventOutboxWorker>();
 
         return services;
     }

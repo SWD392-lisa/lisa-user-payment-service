@@ -10,6 +10,7 @@ namespace ProjectLucy.Application.Interfaces;
 public interface IJwtTokenService
 {
     string GenerateAccessToken(User user);
+    string GenerateRoomAccessToken(AnonymousRoomIdentity identity);
     string GenerateRefreshToken();
     ClaimsPrincipal? GetPrincipalFromExpiredToken(string token);
 }

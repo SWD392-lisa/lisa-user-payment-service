@@ -14,6 +14,7 @@ namespace ProjectLucy.Domain.Entities;
 [Index("ReceiverId", "CreatedAt", Name = "idx_gift_txn_receiver", IsDescending = new[] { false, true })]
 [Index("SenderId", "CreatedAt", Name = "idx_gift_txn_sender", IsDescending = new[] { false, true })]
 [Index("RoomSessionId", Name = "idx_gift_txn_session")]
+[Index(nameof(IdempotencyKey), Name = "uq_gift_txn_idempotency", IsUnique = true)]
 public partial class GiftTransaction
 {
     [Key]
@@ -44,6 +45,9 @@ public partial class GiftTransaction
 
     [Column("created_at")]
     public DateTime CreatedAt { get; set; }
+
+    [Column("idempotency_key")]
+    public Guid? IdempotencyKey { get; set; }
 
     [ForeignKey("GiftId")]
     [InverseProperty("GiftTransactions")]

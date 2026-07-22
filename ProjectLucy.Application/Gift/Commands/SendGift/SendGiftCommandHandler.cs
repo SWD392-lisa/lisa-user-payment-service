@@ -38,6 +38,14 @@ public class SendGiftCommandHandler : IRequestHandler<SendGiftCommand, Result<Gi
 
     public async Task<Result<GiftTransactionDto>> Handle(SendGiftCommand cmd, CancellationToken ct)
     {
+        if (cmd.Request.Quantity is < 1 or > 99)
+            throw new BadRequestException("Gift quantity must be between 1 and 99");
+        if (cmd.Request.IdempotencyKey.HasValue)
+        {
+            var previous = await _giftTxnRepo.GetByIdempotencyKeyAsync(cmd.Request.IdempotencyKey.Value, ct);
+            if (previous != null)
+                return Result<GiftTransactionDto>.Success(ToDto(previous), "Gift request already completed");
+        }
         // 1. Validate sender exists and has LUCY role
         var sender = await _userRepo.GetByIdTrackedAsync(cmd.SenderId, ct);
         if (sender == null)
@@ -176,6 +184,7 @@ public class SendGiftCommandHandler : IRequestHandler<SendGiftCommand, Result<Gi
             Quantity = cmd.Request.Quantity,
             TotalValue = totalCost,
             CreatedAt = DateTime.UtcNow
+            ,IdempotencyKey = cmd.Request.IdempotencyKey
         };
         await _giftTxnRepo.AddAsync(giftTxn, ct);
 
@@ -201,4 +210,20 @@ public class SendGiftCommandHandler : IRequestHandler<SendGiftCommand, Result<Gi
 
         return Result<GiftTransactionDto>.Success(dto, "Gift sent successfully");
     }
+
+    private static GiftTransactionDto ToDto(GiftTransaction txn) => new()
+    {
+        Id = txn.Id,
+        SenderId = txn.SenderId,
+        SenderName = txn.Sender?.UserFullName ?? string.Empty,
+        ReceiverId = txn.ReceiverId,
+        ReceiverName = txn.Receiver?.UserFullName ?? string.Empty,
+        GiftId = txn.GiftId,
+        GiftName = txn.Gift?.Name ?? string.Empty,
+        GiftIconUrl = txn.Gift?.IconUrl,
+        RoomSessionId = txn.RoomSessionId,
+        Quantity = txn.Quantity,
+        TotalValue = txn.TotalValue,
+        CreatedAt = txn.CreatedAt
+    };
 }
