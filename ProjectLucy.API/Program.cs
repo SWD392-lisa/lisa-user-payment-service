@@ -187,11 +187,13 @@ var app = builder.Build();
 
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 
-if (app.Environment.IsDevelopment())
+app.UseSwagger();
+app.UseSwaggerUI(options =>
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+    options.SwaggerEndpoint("/swagger/v1/swagger.json", "LISA User & Payment API v1");
+    options.RoutePrefix = "swagger";
+    options.EnablePersistAuthorization();
+});
 
 app.UseCors("AllowFrontend");
 

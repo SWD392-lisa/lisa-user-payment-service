@@ -18,3 +18,21 @@ public class RoomPersonaResponse
     public string RoomAccessToken { get; set; } = null!;
     public DateTime ExpiresAt { get; set; }
 }
+
+public class RoomParticipantIdentitiesRequest
+{
+    [Required]
+    public Guid RoomSessionId { get; set; }
+
+    [Required]
+    [MinLength(1)]
+    [MaxLength(100)]
+    public List<Guid> AnonymousIds { get; set; } = [];
+}
+
+public class RoomParticipantIdentityResponse
+{
+    public Guid AnonymousId { get; set; }
+    public string FullName { get; set; } = null!;
+    public string Email { get; set; } = null!;
+}

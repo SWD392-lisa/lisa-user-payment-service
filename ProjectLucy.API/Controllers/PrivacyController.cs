@@ -81,6 +81,45 @@ public class PrivacyController : ControllerBase
         });
     }
 
+    [HttpPost("room-participant-identities")]
+    public async Task<ActionResult<IReadOnlyList<RoomParticipantIdentityResponse>>> GetRoomParticipantIdentities(
+        [FromBody] RoomParticipantIdentitiesRequest request,
+        CancellationToken ct)
+    {
+        if (!TryGetUserId(out var userId)) return Unauthorized();
+
+        // Only the active room host can resolve a persona back to its learner.
+        var isRoomHost = await _db.RoomGiftRecipients.AsNoTracking().AnyAsync(
+            x => x.RoomSessionId == request.RoomSessionId
+                && x.RecipientUserId == userId
+                && x.IsActive
+                && x.ExpiresAt > DateTime.UtcNow,
+            ct);
+        if (!isRoomHost) return Forbid();
+
+        var anonymousIds = request.AnonymousIds
+            .Where(id => id != Guid.Empty)
+            .Distinct()
+            .ToList();
+        if (anonymousIds.Count == 0) return BadRequest(new { message = "anonymousIds is required" });
+
+        var identities = await _db.AnonymousRoomIdentities
+            .AsNoTracking()
+            .Include(x => x.User)
+            .Where(x => x.RoomSessionId == request.RoomSessionId
+                && x.ExpiresAt > DateTime.UtcNow
+                && anonymousIds.Contains(x.AnonymousId))
+            .Select(x => new RoomParticipantIdentityResponse
+            {
+                AnonymousId = x.AnonymousId,
+                FullName = x.User.UserFullName,
+                Email = x.User.UserEmail
+            })
+            .ToListAsync(ct);
+
+        return Ok(identities);
+    }
+
     private bool TryGetUserId(out Guid userId)
     {
         var raw = User.FindFirstValue(ClaimTypes.NameIdentifier);
