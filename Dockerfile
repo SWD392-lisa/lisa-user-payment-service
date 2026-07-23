@@ -19,6 +19,8 @@ WORKDIR /app
 
 ENV ASPNETCORE_URLS=http://+:8080
 ENV ASPNETCORE_ENVIRONMENT=Production
+# Poll for config file changes instead of inotify — avoids "inotify instance limit reached" crash on constrained containers (Render).
+ENV DOTNET_USE_POLLING_FILE_WATCHER=true
 
 EXPOSE 8080
 
